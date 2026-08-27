@@ -57,7 +57,7 @@
 #'   ...)` to add app context, or pass any string to take full control.
 #'
 #' @return (Invisibly) a list with `chat` (the wired `Chat`), and the
-#'   reactives `trace` (the ordered call trace, see `genui_trace()`) and
+#'   reactives `trace` (the ordered call trace, see [genui_trace()]) and
 #'   `instances` (the live instance state, a named list keyed by id).
 #' @export
 genui_server <- function(
@@ -100,11 +100,12 @@ genui_server <- function(
       store <- new.env(parent = emptyenv())
       session$userData$shinygenui <- store
     }
-    assign(
-      session$ns(NULL),
-      list(engine = engine, trace = trace_rv, instances = instances_rv),
-      envir = store
+    handles <- list(
+      engine = engine,
+      trace = shiny::reactive(trace_rv()),
+      instances = shiny::reactive(instances_rv())
     )
+    assign(session$ns(NULL), handles, envir = store)
 
     chat$set_system_prompt(system_prompt %||% genui_prompt(catalog))
     for (tool in compile_tools(catalog, engine)) {
@@ -122,8 +123,8 @@ genui_server <- function(
 
     invisible(list(
       chat = chat,
-      trace = shiny::reactive(trace_rv()),
-      instances = shiny::reactive(instances_rv())
+      trace = handles$trace,
+      instances = handles$instances
     ))
   })
 }

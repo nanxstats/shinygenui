@@ -8,7 +8,7 @@ genui_catalog(...)
 }
 \arguments{
 \item{...}{\code{\link[=genui_component]{genui_component()}} objects, or lists of them (so component
-packs such as \code{genui_components_bslib()} can be passed directly).}
+packs such as \code{\link[=genui_components_bslib]{genui_components_bslib()}} can be passed directly).}
 }
 \value{
 A \code{genui_catalog} object: a named list of components, keyed by
@@ -18,7 +18,7 @@ component name.
 A catalog is the finite set of components the model is allowed to render.
 Each component compiles to one \code{\link[ellmer:tool]{ellmer::tool()}}; the built-in lifecycle
 tools (\code{update_component}, \code{remove_component}, \code{clear_canvas}) are
-registered alongside it by \code{genui_server()}.
+registered alongside it by \code{\link[=genui_server]{genui_server()}}.
 }
 \examples{
 note <- genui_component(

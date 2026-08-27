@@ -3,10 +3,10 @@
 #' A catalog is the finite set of components the model is allowed to render.
 #' Each component compiles to one [ellmer::tool()]; the built-in lifecycle
 #' tools (`update_component`, `remove_component`, `clear_canvas`) are
-#' registered alongside it by `genui_server()`.
+#' registered alongside it by [genui_server()].
 #'
 #' @param ... [genui_component()] objects, or lists of them (so component
-#'   packs such as `genui_components_bslib()` can be passed directly).
+#'   packs such as [genui_components_bslib()] can be passed directly).
 #'
 #' @return A `genui_catalog` object: a named list of components, keyed by
 #'   component name.

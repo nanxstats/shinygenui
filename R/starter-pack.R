@@ -76,6 +76,52 @@ check_column <- function(data, column, numeric = FALSE) {
   NULL
 }
 
+#' Container component: a titled row of cards
+#'
+#' A container the model can place other components into: create the row,
+#' then create children with `parent_id` set to the row's instance id.
+#' Children lay out in a responsive grid inside the row's card. Removing
+#' the row removes its children. Add it to your [genui_catalog()] alongside
+#' [genui_components_bslib()] (or your own components) to let the model
+#' group related views.
+#'
+#' @return A [genui_component()] object with `container = TRUE`.
+#' @export
+#' @examples
+#' catalog <- genui_catalog(
+#'   genui_card_row(),
+#'   genui_component(
+#'     name = "note_card",
+#'     description = "A card showing a short note.",
+#'     args = list(text = "The note text."),
+#'     ui = function(id, args) htmltools::p(args$text)
+#'   )
+#' )
+genui_card_row <- function() {
+  genui_component(
+    name = "card_row",
+    description = paste(
+      "A titled row that groups related components side by side.",
+      "Create it first, then create each child with parent_id set to this",
+      "row's instance id. Good for a band of value boxes or paired plots."
+    ),
+    args = list(
+      title = ellmer::type_string("Heading above the row.", required = FALSE)
+    ),
+    ui = function(id, args) {
+      ns <- shiny::NS(id)
+      bslib::card(
+        if (!is.null(args$title)) bslib::card_header(args$title),
+        bslib::card_body(
+          htmltools::div(id = ns("slot"), class = "genui-slot")
+        )
+      )
+    },
+    container = TRUE,
+    width = "full"
+  )
+}
+
 component_value_box <- function(data) {
   genui_component(
     name = "value_box",

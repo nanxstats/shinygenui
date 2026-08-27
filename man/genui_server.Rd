@@ -39,7 +39,7 @@ sent to the model.}
 }
 \value{
 (Invisibly) a list with \code{chat} (the wired \code{Chat}), and the
-reactives \code{trace} (the ordered call trace, see \code{genui_trace()}) and
+reactives \code{trace} (the ordered call trace, see \code{\link[=genui_trace]{genui_trace()}}) and
 \code{instances} (the live instance state, a named list keyed by id).
 }
 \description{

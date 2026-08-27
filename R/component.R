@@ -28,7 +28,7 @@
 #'   the validated argument list.
 #' @param server Optional `function(id, args, data)` that calls
 #'   [shiny::moduleServer()] to wire outputs and embedded inputs. `data` is
-#'   the reactive passed to `genui_server()`. If the module creates
+#'   the reactive passed to [genui_server()]. If the module creates
 #'   observers, include them in the module's return value (alone or inside a
 #'   list) so the package can destroy them when the instance is updated or
 #'   removed. A `reactives` element in the return value is stored in the
