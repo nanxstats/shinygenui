@@ -15,8 +15,7 @@ log_plan <- function(plan) {
   if (!genui_verbose()) {
     return(invisible())
   }
-  message <- switch(
-    plan$action,
+  message <- switch(plan$action,
     create = sprintf(
       "create %s (%s)%s",
       plan$id,

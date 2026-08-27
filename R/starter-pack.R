@@ -158,8 +158,7 @@ component_value_box <- function(data) {
           df <- data()
           shiny::req(is.data.frame(df))
           column <- df[[args$column]]
-          value <- switch(
-            args$agg,
+          value <- switch(args$agg,
             mean = mean(column, na.rm = TRUE),
             median = stats::median(column, na.rm = TRUE),
             min = min(column, na.rm = TRUE),

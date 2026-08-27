@@ -99,8 +99,7 @@ genui_dispatch <- function(catalog, call, state, data = NULL) {
   call <- as_genui_call(call)
   state <- as_genui_state(state)
 
-  switch(
-    call[["tool"]],
+  switch(call[["tool"]],
     update_component = dispatch_update(catalog, call[["args"]], state, data),
     remove_component = dispatch_remove(call[["args"]], state),
     clear_canvas = dispatch_clear(state),
@@ -340,8 +339,7 @@ validate_arg_value <- function(type, value, arg, component) {
     }
   } else if (inherits(type, "ellmer::TypeBasic")) {
     kind <- attr(type, "type", exact = TRUE)
-    ok <- switch(
-      kind,
+    ok <- switch(kind,
       string = is_string(value),
       boolean = is.logical(value) && length(value) == 1 && !is.na(value),
       integer = is.numeric(value) &&

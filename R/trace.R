@@ -157,8 +157,7 @@ trace_entry_call <- function(entry) {
   if (!is.list(entry) || !is_string(entry$op)) {
     genui_abort("Malformed trace entry: expected a list with an {.field op} string.")
   }
-  switch(
-    entry$op,
+  switch(entry$op,
     create = genui_call(
       entry$component,
       c(

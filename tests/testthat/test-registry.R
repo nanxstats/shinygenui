@@ -56,8 +56,7 @@ test_that("replaying a trace through dispatch reproduces the state", {
   # Fold the trace into a fresh registry using the same pure pipeline.
   replayed <- GenuiRegistry$new()
   for (entry in registry$trace()) {
-    call <- switch(
-      entry$op,
+    call <- switch(entry$op,
       create = genui_call(
         entry$component,
         c(entry$args, if (!is.null(entry$parent_id)) list(parent_id = entry$parent_id))

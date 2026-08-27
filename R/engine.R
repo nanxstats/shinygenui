@@ -11,7 +11,6 @@ GenuiEngine <- R6::R6Class(
   "GenuiEngine",
   public = list(
     registry = NULL,
-
     initialize = function(catalog, session, data = NULL) {
       check_catalog(catalog)
       private$catalog <- catalog
@@ -78,10 +77,8 @@ GenuiEngine <- R6::R6Class(
         )
       )
     },
-
     execute = function(plan) {
-      switch(
-        plan$action,
+      switch(plan$action,
         create = private$execute_create(plan),
         update = private$execute_update(plan),
         remove = private$execute_remove(plan),
@@ -121,7 +118,6 @@ GenuiEngine <- R6::R6Class(
       values <- drop_nulls(values)
       if (length(values) == 0) NULL else values
     },
-
     current_data = function() {
       if (is.function(private$data)) {
         shiny::isolate(private$data())
@@ -129,15 +125,12 @@ GenuiEngine <- R6::R6Class(
         private$data
       }
     },
-
     canvas_selector = function() {
       paste0("#", private$session$ns("canvas"))
     },
-
     shell_dom_id = function(id) {
       private$session$ns(paste0("shell-", id))
     },
-
     target_selector = function(parent_id) {
       if (is.null(parent_id)) {
         private$canvas_selector()
@@ -146,7 +139,6 @@ GenuiEngine <- R6::R6Class(
         paste0("#", private$session$ns(paste0(parent_id, "-slot")))
       }
     },
-
     build_shell = function(component, plan) {
       htmltools::div(
         id = private$shell_dom_id(plan$id),
@@ -155,7 +147,6 @@ GenuiEngine <- R6::R6Class(
         component$ui(private$session$ns(plan$id), plan$args)
       )
     },
-
     run_component_server = function(component, plan) {
       if (is.null(component$server)) {
         return(NULL)
@@ -165,7 +156,6 @@ GenuiEngine <- R6::R6Class(
         component$server(plan$id, plan$args, private$data)
       )
     },
-
     execute_create = function(plan) {
       component <- catalog_get(private$catalog, plan$component)
       shell <- private$build_shell(component, plan)
@@ -192,7 +182,6 @@ GenuiEngine <- R6::R6Class(
       self$registry$apply(plan)
       self$registry$set_handles(plan$id, handles)
     },
-
     execute_update = function(plan) {
       component <- catalog_get(private$catalog, plan$component)
       # Building the new UI first means arg-dependent render errors leave the
@@ -221,7 +210,6 @@ GenuiEngine <- R6::R6Class(
       handles <- private$run_component_server(component, plan)
       self$registry$set_handles(plan$id, handles)
     },
-
     execute_remove = function(plan) {
       self$registry$apply(plan)
       # Children live inside the parent shell, so removing the top shell
@@ -233,7 +221,6 @@ GenuiEngine <- R6::R6Class(
         session = private$session
       )
     },
-
     execute_clear = function(plan) {
       self$registry$apply(plan)
       shiny::removeUI(
@@ -249,8 +236,7 @@ GenuiEngine <- R6::R6Class(
 # Describe an executed plan to the model. The instance id is load-bearing:
 # it is how the model addresses the component in later update/remove calls.
 plan_tool_result <- function(plan) {
-  value <- switch(
-    plan$action,
+  value <- switch(plan$action,
     create = sprintf(
       "Created component instance \"%s\" (%s)%s. Refer to it by id \"%s\" in update_component or remove_component.",
       plan$id,
@@ -281,8 +267,7 @@ plan_tool_result <- function(plan) {
     }
   )
 
-  title <- switch(
-    plan$action,
+  title <- switch(plan$action,
     create = sprintf("Canvas: added %s", plan$component),
     update = sprintf("Canvas: updated %s", plan$id),
     remove = sprintf("Canvas: removed %s", plan$id),

@@ -89,8 +89,7 @@ test_that("genui_server validates its inputs", {
     shiny::testServer(
       genui_server,
       args = list(id = "genui", catalog = test_catalog(), chat = "not a chat"),
-      {
-      }
+      {}
     ),
     class = "genui_error"
   )

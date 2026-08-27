@@ -18,8 +18,7 @@ GenuiRegistry <- R6::R6Class(
       if (!inherits(plan, "genui_plan")) {
         genui_abort("{.arg plan} must be a {.cls genui_plan} from {.fn genui_dispatch}.")
       }
-      switch(
-        plan$action,
+      switch(plan$action,
         create = private$apply_create(plan),
         update = private$apply_update(plan),
         remove = private$apply_remove(plan),
@@ -43,7 +42,6 @@ GenuiRegistry <- R6::R6Class(
       private$instances[[id]] <- instance
       invisible(self)
     },
-
     destroy_handles = function(id) {
       instance <- private$instances[[id]]
       if (is.null(instance)) {
@@ -58,7 +56,6 @@ GenuiRegistry <- R6::R6Class(
       private$instances[[id]] <- instance
       invisible(self)
     },
-
     snapshot = function() {
       list(
         instances = lapply(private$instances, function(x) {
@@ -67,17 +64,11 @@ GenuiRegistry <- R6::R6Class(
         next_id = private$counter + 1L
       )
     },
-
     trace = function() private$trace_log,
-
     ids = function() names(private$instances) %||% character(),
-
     has = function(id) !is.null(private$instances[[id]]),
-
     get = function(id) private$get_instance(id),
-
     reactives = function(id) private$get_instance(id)$reactives,
-
     size = function() length(private$instances),
 
     # Called with no arguments after every applied plan; the Shiny layer
@@ -93,7 +84,6 @@ GenuiRegistry <- R6::R6Class(
     counter = 0L,
     trace_log = list(),
     on_change = NULL,
-
     get_instance = function(id) {
       instance <- private$instances[[id]]
       if (is.null(instance)) {
@@ -101,7 +91,6 @@ GenuiRegistry <- R6::R6Class(
       }
       instance
     },
-
     apply_create = function(plan) {
       if (!is.null(private$instances[[plan$id]])) {
         genui_abort("Instance id {.val {plan$id}} already exists; stale plan?")
@@ -126,7 +115,6 @@ GenuiRegistry <- R6::R6Class(
         parent_id = plan$parent_id
       )))
     },
-
     apply_update = function(plan) {
       instance <- private$get_instance(plan$id)
       self$destroy_handles(plan$id)
@@ -135,7 +123,6 @@ GenuiRegistry <- R6::R6Class(
       private$instances[[plan$id]] <- instance
       private$record(list(op = "update", id = plan$id, args = plan$delta))
     },
-
     apply_remove = function(plan) {
       private$get_instance(plan$id)
       for (id in plan$ids) {
@@ -144,7 +131,6 @@ GenuiRegistry <- R6::R6Class(
       }
       private$record(list(op = "remove", id = plan$id))
     },
-
     apply_clear = function(plan) {
       for (id in plan$ids) {
         self$destroy_handles(id)
@@ -152,11 +138,9 @@ GenuiRegistry <- R6::R6Class(
       private$instances <- list()
       private$record(list(op = "clear"))
     },
-
     record = function(entry) {
       private$trace_log[[length(private$trace_log) + 1L]] <- entry
     },
-
     notify = function() {
       if (!is.null(private$on_change)) {
         private$on_change()

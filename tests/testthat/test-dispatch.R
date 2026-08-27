@@ -400,10 +400,10 @@ test_that("update with no changes re-renders as-is", {
 test_that("remove cascades to descendants, leaves first", {
   catalog <- test_catalog()
   registry <- GenuiRegistry$new()
-  apply_call(registry, catalog, "card_row", list())                                # c1
-  apply_call(registry, catalog, "card_row", list(parent_id = "c1"))                # c2
+  apply_call(registry, catalog, "card_row", list()) # c1
+  apply_call(registry, catalog, "card_row", list(parent_id = "c1")) # c2
   apply_call(registry, catalog, "value_box", list(title = "A", column = "mpg", parent_id = "c2")) # c3
-  apply_call(registry, catalog, "value_box", list(title = "B", column = "hp", parent_id = "c1"))  # c4
+  apply_call(registry, catalog, "value_box", list(title = "B", column = "hp", parent_id = "c1")) # c4
 
   plan <- genui_dispatch(catalog, genui_call("remove_component", list(id = "c1")), registry)
   expect_identical(plan$action, "remove")
@@ -436,7 +436,7 @@ test_that("clear plans all instances, leaves first", {
   catalog <- test_catalog()
   registry <- GenuiRegistry$new()
   apply_call(registry, catalog, "value_box", list(title = "A", column = "mpg")) # c1
-  apply_call(registry, catalog, "card_row", list())                            # c2
+  apply_call(registry, catalog, "card_row", list()) # c2
   apply_call(registry, catalog, "value_box", list(title = "B", column = "hp", parent_id = "c2")) # c3
 
   plan <- genui_dispatch(catalog, genui_call("clear_canvas"), registry)
