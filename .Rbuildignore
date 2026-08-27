@@ -12,3 +12,9 @@
 ^deps-src$
 ^okr\.toml$
 ^okr\.lock$
+
+^DESIGN\.md$
+^\.env$
+^doc$
+^Meta$
+^tests/manual$

@@ -1,0 +1,49 @@
+/* Canvas: a responsive grid that component shells flow into. */
+.genui-canvas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  align-items: start;
+  align-content: start;
+}
+
+.genui-canvas:empty::before {
+  content: attr(data-placeholder);
+  color: var(--bs-secondary-color, #6c757d);
+  font-style: italic;
+  padding: 2rem 0;
+  text-align: center;
+  grid-column: 1 / -1;
+}
+
+/* One shell per instance; the shell is stable across updates. */
+.genui-shell {
+  min-width: 0;
+}
+
+.genui-shell.genui-width-wide {
+  grid-column: span 2;
+}
+
+.genui-shell.genui-width-full {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 700px) {
+  .genui-shell.genui-width-wide {
+    grid-column: auto;
+  }
+}
+
+/* Container components render children into a slot with the same grid. */
+.genui-slot {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.genui-slot:empty::before {
+  content: "";
+  min-height: 1rem;
+}

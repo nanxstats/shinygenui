@@ -6,3 +6,7 @@
 /vignettes/*.R
 
 /deps-src/
+.env
+/doc/
+/Meta/
+/tests/manual/*.png
