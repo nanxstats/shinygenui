@@ -1,0 +1,6 @@
+# shinygenui
+
+``` r
+
+library(shinygenui)
+```
