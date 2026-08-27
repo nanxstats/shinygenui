@@ -1,6 +1,7 @@
 ^shinygenui\.Rproj$
 ^\.Rproj\.user$
 
+^\.github$
 ^LICENSE\.md$
 
 ^AGENTS\.md$
