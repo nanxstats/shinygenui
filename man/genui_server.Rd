@@ -64,3 +64,26 @@ Create the \code{Chat} object inside your server function, one per session.
 Sharing a single \code{Chat} across sessions would cross-wire the tool
 closures and leak conversation history between users.
 }
+\section{Update semantics}{
+
+\code{update_component} re-instantiates the component's module with the merged
+arguments inside the instance's stable shell: same canvas position, same
+ids, no page flicker. Because the module restarts, embedded input state
+(like the starter histogram's bin slider) resets to its defaults on
+update; snapshotting and restoring embedded input values across updates
+is explicitly future work.
+}
+
+\section{Error feedback}{
+
+Any failure while handling a tool call --- schema validation, a
+component's \code{check()} hook, or a rendering error --- is signaled as a
+regular R condition. ellmer catches it and returns
+\code{conditionMessage()} to the model as the tool error, so the model can
+correct its arguments and retry; the Shiny session itself never crashes,
+and a failed call never leaves a half-rendered component behind.
+Failures are always logged to the app's server log; set
+\code{options(shinygenui.verbose = TRUE)} to also log successful canvas
+operations.
+}
+

@@ -23,16 +23,24 @@ GenuiEngine <- R6::R6Class(
     # Full pipeline for one model-issued call: validate + plan, execute
     # against the DOM and registry, and describe the outcome to the model.
     # Errors (validation or rendering) propagate; ellmer converts them into
-    # tool errors for the model, and the session never sees them.
+    # tool errors for the model, and the session never sees them. Failures
+    # are logged on the way out without being caught.
     handle = function(call) {
-      plan <- genui_dispatch(
-        private$catalog,
-        call,
-        self$registry,
-        data = private$current_data()
+      call <- as_genui_call(call)
+      withCallingHandlers(
+        {
+          plan <- genui_dispatch(
+            private$catalog,
+            call,
+            self$registry,
+            data = private$current_data()
+          )
+          self$execute(plan)
+          log_plan(plan)
+          plan_tool_result(plan)
+        },
+        error = function(e) log_failure(call, e)
       )
-      self$execute(plan)
-      plan_tool_result(plan)
     },
 
     execute = function(plan) {
