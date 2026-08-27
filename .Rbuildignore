@@ -15,5 +15,6 @@
 
 ^DESIGN\.md$
 ^prompts\.md$
+^\.env$
 ^doc$
 ^Meta$
