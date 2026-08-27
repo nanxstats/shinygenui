@@ -9,3 +9,4 @@
 .env
 /doc/
 /Meta/
+/tests/manual/*.png

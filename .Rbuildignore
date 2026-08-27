@@ -14,7 +14,7 @@
 ^okr\.lock$
 
 ^DESIGN\.md$
-^prompts\.md$
 ^\.env$
 ^doc$
 ^Meta$
+^tests/manual$
