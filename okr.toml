@@ -1,0 +1,36 @@
+[project]
+r-version = "4.6.1"
+snapshot = "2026-08-27"
+strict = false
+
+[vendor]
+path = "deps-src"
+include-tests = true
+exclude = []
+gitignore = true
+
+[manifest]
+agents-file = true
+
+[packages]
+shiny = "*"
+htmltools = "*"
+bslib = "*"
+ellmer = "*"
+shinychat = "*"
+R6 = "*"
+rlang = "*"
+promises = "*"
+whisker = "*"
+cli = "*"
+jsonlite = "*"
+ggplot2 = "*"
+DT = "*"
+testthat = "*"
+shinytest2 = "*"
+S7 = "*"
+querychat = "*"
+
+[references]
+json-render = "vercel-labs/json-render"
+a2ui = "a2ui-project/a2ui"
