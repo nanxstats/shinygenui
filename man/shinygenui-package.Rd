@@ -4,16 +4,16 @@
 \name{shinygenui-package}
 \alias{shinygenui}
 \alias{shinygenui-package}
-\title{shinygenui: What the Package Does (One Line, Title Case)}
+\title{shinygenui: Generative UI for 'shiny'}
 \description{
-What the package does (one paragraph).
+What the package does (one paragraph, 2+ sentences).
 }
 \author{
-\strong{Maintainer}: First Last \email{first.last@example.com}
+\strong{Maintainer}: Nan Xiao \email{me@nanx.me} (\href{https://orcid.org/0000-0002-0250-5673}{ORCID}) [copyright holder]
 
 Authors:
 \itemize{
-  \item First Last \email{first.last@example.com}
+  \item Nan Xiao \email{me@nanx.me} (\href{https://orcid.org/0000-0002-0250-5673}{ORCID}) [copyright holder]
 }
 
 }

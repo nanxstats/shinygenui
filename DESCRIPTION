@@ -1,9 +1,11 @@
 Package: shinygenui
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Title: Generative UI for 'shiny'
+Version: 0.1.0
+Authors@R: c(
+    person("Nan", "Xiao", email = "me@nanx.me", role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0000-0002-0250-5673"))
+    )
+Description: What the package does (one paragraph, 2+ sentences).
 License: MIT + file LICENSE
 Encoding: UTF-8
 Suggests: 
