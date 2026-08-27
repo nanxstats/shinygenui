@@ -2,16 +2,17 @@
 
 ## Authors
 
-- **First Last**. Author, maintainer.
+- **Nan Xiao**. Author, maintainer, copyright holder.
+  [](https://orcid.org/0000-0002-0250-5673)
 
 ## Citation
 
-Last F (2026). *shinygenui: What the Package Does (One Line, Title
-Case)*. R package version 0.0.0.9000.
+Xiao N (2026). *shinygenui: Generative UI for 'shiny'*. R package
+version 0.1.0.
 
     @Manual{,
-      title = {shinygenui: What the Package Does (One Line, Title Case)},
-      author = {First Last},
+      title = {shinygenui: Generative UI for 'shiny'},
+      author = {Nan Xiao},
       year = {2026},
-      note = {R package version 0.0.0.9000},
+      note = {R package version 0.1.0},
     }

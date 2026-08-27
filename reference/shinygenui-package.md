@@ -1,11 +1,13 @@
-# shinygenui: What the Package Does (One Line, Title Case)
+# shinygenui: Generative UI for 'shiny'
 
-What the package does (one paragraph).
+What the package does (one paragraph, 2+ sentences).
 
 ## Author
 
-**Maintainer**: First Last <first.last@example.com>
+**Maintainer**: Nan Xiao <me@nanx.me>
+([ORCID](https://orcid.org/0000-0002-0250-5673)) \[copyright holder\]
 
 Authors:
 
-- First Last <first.last@example.com>
+- Nan Xiao <me@nanx.me> ([ORCID](https://orcid.org/0000-0002-0250-5673))
+  \[copyright holder\]
