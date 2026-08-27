@@ -20,15 +20,21 @@ Encoding: UTF-8
 Depends:
     R (>= 4.1.0)
 Imports:
+    bslib,
     cli,
     ellmer (>= 0.4.0),
+    htmltools,
     jsonlite,
+    promises,
     R6,
     rlang,
-    utils
+    shiny,
+    shinychat (>= 0.4.0),
+    stats,
+    utils,
+    whisker
 Suggests:
     DT,
-    htmltools,
     ggplot2,
     knitr,
     rmarkdown,
