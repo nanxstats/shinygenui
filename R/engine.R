@@ -43,6 +43,42 @@ GenuiEngine <- R6::R6Class(
       )
     },
 
+    # Read-only view for the get_canvas_state tool: instances with their
+    # current args plus the live values of embedded inputs. Not recorded in
+    # the trace (reads are not part of the spec of record); embedded input
+    # values are surfaced here precisely because they are ephemeral and
+    # never in the trace.
+    canvas_state = function() {
+      snapshot <- self$registry$snapshot()$instances
+      state <- lapply(names(snapshot), function(id) {
+        instance <- snapshot[[id]]
+        drop_nulls(list(
+          id = id,
+          component = instance$component,
+          args = instance$args,
+          parent_id = instance$parent_id,
+          inputs = private$instance_inputs(id)
+        ))
+      })
+
+      value <- if (length(state) == 0) {
+        "The canvas is empty."
+      } else {
+        to_json_compact(state)
+      }
+      ellmer::ContentToolResult(
+        value = value,
+        extra = list(
+          display = list(
+            title = "Canvas: read state",
+            markdown = sprintf("Read %d instance(s).", length(state)),
+            show_request = FALSE,
+            open = FALSE
+          )
+        )
+      )
+    },
+
     execute = function(plan) {
       switch(
         plan$action,
@@ -59,6 +95,32 @@ GenuiEngine <- R6::R6Class(
     catalog = NULL,
     session = NULL,
     data = NULL,
+
+    # Live values of an instance's embedded inputs, read off the module
+    # session (child module inputs are named "<instance id>-<input>").
+    # Values that cannot be serialized to JSON are dropped.
+    instance_inputs = function(id) {
+      input <- private$session$input
+      names <- shiny::isolate(names(input)) %||% character()
+      prefix <- paste0(id, "-")
+      names <- names[startsWith(names, prefix)]
+      if (length(names) == 0) {
+        return(NULL)
+      }
+      values <- lapply(names, function(name) {
+        tryCatch(
+          {
+            value <- shiny::isolate(input[[name]])
+            jsonlite::toJSON(value, auto_unbox = TRUE, null = "null")
+            value
+          },
+          error = function(e) NULL
+        )
+      })
+      names(values) <- substring(names, nchar(prefix) + 1L)
+      values <- drop_nulls(values)
+      if (length(values) == 0) NULL else values
+    },
 
     current_data = function() {
       if (is.function(private$data)) {

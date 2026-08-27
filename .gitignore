@@ -6,3 +6,5 @@
 /vignettes/*.R
 
 /deps-src/
+/doc/
+/Meta/

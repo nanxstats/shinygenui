@@ -19,7 +19,8 @@ test_that("compile_tools produces one tool per component plus built-ins", {
     names,
     c(
       "value_box", "scatter_plot", "data_table", "card_row",
-      "update_component", "remove_component", "clear_canvas"
+      "update_component", "remove_component", "clear_canvas",
+      "get_canvas_state"
     )
   )
   for (tool in tools) {

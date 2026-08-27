@@ -112,6 +112,24 @@ builtin_tools <- function(engine) {
       ),
       arguments = list(),
       annotations = ellmer::tool_annotations(title = "Clear canvas")
+    ),
+    ellmer::tool(
+      function() {
+        engine$canvas_state()
+      },
+      name = "get_canvas_state",
+      description = paste(
+        "Read the current canvas: every component instance with its id,",
+        "arguments, and the live values of its embedded inputs (which the",
+        "user may have changed since you created it).",
+        "Use it when you are unsure what is on the canvas or what the user",
+        "adjusted. It changes nothing."
+      ),
+      arguments = list(),
+      annotations = ellmer::tool_annotations(
+        title = "Read canvas state",
+        read_only_hint = TRUE
+      )
     )
   )
 }

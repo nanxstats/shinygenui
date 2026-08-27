@@ -20,7 +20,8 @@ test_that("genui_server registers tools and installs the system prompt", {
         names(chat$get_tools()),
         c(
           "value_box", "scatter_plot", "data_table", "card_row",
-          "update_component", "remove_component", "clear_canvas"
+          "update_component", "remove_component", "clear_canvas",
+          "get_canvas_state"
         )
       )
       expect_match(chat$get_system_prompt(), "### value_box")
