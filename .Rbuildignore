@@ -12,3 +12,6 @@
 ^deps-src$
 ^okr\.toml$
 ^okr\.lock$
+
+^DESIGN\.md$
+^prompts\.md$
