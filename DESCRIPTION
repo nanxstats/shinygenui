@@ -7,8 +7,10 @@ Authors@R: c(
     )
 Description: What the package does (one paragraph, 2+ sentences).
 License: MIT + file LICENSE
+URL: https://nanx.me/shinygenui/, https://github.com/nanxstats/shinygenui
+BugReports: https://github.com/nanxstats/shinygenui/issues
 Encoding: UTF-8
-Suggests: 
+Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
