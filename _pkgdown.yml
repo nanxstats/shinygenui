@@ -1,0 +1,7 @@
+url: https://nanx.me/shinygenui/
+
+template:
+  bootstrap: 5
+  bslib:
+    preset: "bootstrap"
+  math-rendering: "mathjax"
