@@ -7,12 +7,16 @@
 
 ## Citation
 
+Source:
+[`DESCRIPTION`](https://github.com/nanxstats/shinygenui/blob/main/DESCRIPTION)
+
 Xiao N (2026). *shinygenui: Generative UI for 'shiny'*. R package
-version 0.1.0.
+version 0.1.0, <https://nanx.me/shinygenui/>.
 
     @Manual{,
       title = {shinygenui: Generative UI for 'shiny'},
       author = {Nan Xiao},
       year = {2026},
       note = {R package version 0.1.0},
+      url = {https://nanx.me/shinygenui/},
     }
