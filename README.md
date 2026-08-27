@@ -4,7 +4,7 @@
 [![R-CMD-check](https://github.com/nanxstats/shinygenui/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/nanxstats/shinygenui/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-shinygenui brings declarative, catalog-constrained generative UI to Shiny.
+shinygenui brings declarative generative UI to Shiny.
 You define a finite catalog of typed UI components as guardrails.
 End users of your deployed app talk to an LLM through a chat panel, and the
 model answers by composing instances of those components, streamed
