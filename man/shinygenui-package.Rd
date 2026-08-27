@@ -6,7 +6,16 @@
 \alias{shinygenui-package}
 \title{shinygenui: Generative UI for 'shiny'}
 \description{
-What the package does (one paragraph, 2+ sentences).
+Declarative, catalog-constrained generative user interfaces for 'shiny'. Developers define a finite catalog of typed UI components; end users converse with a large language model that composes, updates, and removes instances of those components on a canvas through schema-validated 'ellmer' tool calls, streamed progressively into the running app. The model never emits code: arguments are plain data validated against the catalog, so the guardrails hold by construction.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://nanx.me/shinygenui/}
+  \item \url{https://github.com/nanxstats/shinygenui}
+  \item Report bugs at \url{https://github.com/nanxstats/shinygenui/issues}
+}
+
 }
 \author{
 \strong{Maintainer}: Nan Xiao \email{me@nanx.me} (\href{https://orcid.org/0000-0002-0250-5673}{ORCID}) [copyright holder]
