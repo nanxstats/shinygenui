@@ -5,17 +5,17 @@
 <!-- badges: end -->
 
 shinygenui brings declarative, catalog-constrained generative UI to Shiny.
-You define a finite catalog of typed UI components --- the guardrails.
+You define a finite catalog of typed UI components as guardrails.
 End users of your deployed app talk to an LLM through a chat panel, and the
 model answers by composing instances of those components, streamed
 progressively onto a canvas. The model can also update and remove components
 it previously created, so the generated view is conversationally mutable,
 not append-only.
 
-It is the R/Shiny analogue of Vercel's json-render and Google's A2UI,
-deliberately narrower: one language, one framework, one deployment story ---
-an ordinary Shiny app (for example on Posit Connect), with no sidecar
-servers, no Node, and no schemas or JSON authored by hand.
+It is the R/Shiny analogue of Vercel's json-render and Google's A2UI
+but intentionally narrower: one language, one framework, one deployment story.
+An regular Shiny app (deployed on Posit Connect for example), with no sidecar
+servers, no Node, and no schemas or JSON authored manually.
 
 ## How it stays safe
 
@@ -25,7 +25,7 @@ servers, no Node, and no schemas or JSON authored by hand.
   and the package never calls `eval()` or `parse()` on model output.
   Arguments are data, interpreted only by your component functions.
 - **Grounded, per-session schemas.** Catalogs can be built inside the server
-  function, so argument types can enumerate live facts --- for example, the
+  function, so argument types can enumerate live facts. For example, the
   columns of the active dataset as enum values. A hallucinated column is a
   schema violation the model has to correct.
 - **Error feedback loop.** Validation and rendering failures go back to the
@@ -43,7 +43,7 @@ pak::pak("nanxstats/shinygenui")
 
 A complete app: chat sidebar, canvas, and a starter catalog grounded on
 `mtcars`. Ask for "mpg vs. hp and a value box with the average mpg", then
-"color the scatter by cylinders" --- the existing plot updates in place.
+"color the scatter by cylinders". The existing plot updates in place.
 
 ``` r
 library(shiny)
@@ -90,11 +90,9 @@ genui_component(
 )
 ```
 
-Runnable apps live in
-[`inst/examples/`](https://github.com/nanxstats/shinygenui/tree/main/inst/examples):
-`01-mtcars-explorer` (the basics) and `02-layout` (container rows, plus
-rebuilding a canvas from its trace with `genui_replay()` --- no LLM
-required).
+Runnable example apps live in `inst/examples/`: `01-mtcars-explorer`
+(the basics) and `02-layout` (container rows, plus rebuilding a canvas from
+its trace with `genui_replay()`, no LLM required).
 
 ## Learn more
 
@@ -104,4 +102,4 @@ required).
 
 ## License
 
-MIT © Nan Xiao
+MIT
