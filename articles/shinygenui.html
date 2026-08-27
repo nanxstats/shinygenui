@@ -68,7 +68,217 @@
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://nanx.me/shinygenui/">shinygenui</a></span><span class="op">)</span></span></code></pre></div>
-  </main>
+<p>shinygenui adds a generative UI surface to a Shiny app: a chat panel
+where end users ask questions, and a canvas where a large language model
+answers by composing UI components. The crucial constraint is that the
+model can only render what you allow. You define a finite catalog of
+typed components; each one compiles to an <a href="https://ellmer.tidyverse.org" class="external-link">ellmer</a> tool, and the model
+“renders” by calling those tools with plain data arguments. It never
+writes R code, and the package never evaluates model output. If the
+model supplies a bad argument — a column that does not exist, a value
+outside an enum — the call fails validation and the error message goes
+back to the model to correct, while your session keeps running.</p>
+<div class="section level2">
+<h2 id="a-complete-app">A complete app<a class="anchor" aria-label="anchor" href="#a-complete-app"></a>
+</h2>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.posit.co/" class="external-link">shiny</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/bslib/" class="external-link">bslib</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rstudio.github.io/bslib/reference/page_sidebar.html" class="external-link">page_sidebar</a></span><span class="op">(</span></span>
+<span>  title <span class="op">=</span> <span class="st">"mtcars explorer"</span>,</span>
+<span>  sidebar <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/bslib/reference/sidebar.html" class="external-link">sidebar</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">380</span>, <span class="fu">shinychat</span><span class="fu">::</span><span class="fu"><a href="https://posit-dev.github.io/shinychat/r/reference/chat_ui.html" class="external-link">chat_ui</a></span><span class="op">(</span><span class="st">"chat"</span>, height <span class="op">=</span> <span class="st">"100%"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="../reference/genui_canvas.html">genui_canvas</a></span><span class="op">(</span><span class="st">"canvas"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">catalog</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/genui_catalog.html">genui_catalog</a></span><span class="op">(</span><span class="fu"><a href="../reference/genui_components_bslib.html">genui_components_bslib</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mtcars</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="../reference/genui_server.html">genui_server</a></span><span class="op">(</span></span>
+<span>    <span class="st">"canvas"</span>,</span>
+<span>    catalog <span class="op">=</span> <span class="va">catalog</span>,</span>
+<span>    chat <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_anthropic.html" class="external-link">chat_anthropic</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span>,</span>
+<span>    chat_id <span class="op">=</span> <span class="st">"chat"</span>,</span>
+<span>    greeting <span class="op">=</span> <span class="st">"Ask me about the mtcars data."</span>,</span>
+<span>    system_prompt <span class="op">=</span> <span class="fu"><a href="../reference/genui_prompt.html">genui_prompt</a></span><span class="op">(</span></span>
+<span>      <span class="va">catalog</span>,</span>
+<span>      context <span class="op">=</span> <span class="st">"The data is R's built-in mtcars dataset."</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></code></pre></div>
+<p>Three pieces do all the work:</p>
+<ul>
+<li>
+<code>genui_canvas("canvas")</code> is the container components land
+in.</li>
+<li>
+<code><a href="../reference/genui_catalog.html">genui_catalog()</a></code> collects the components the model may
+use — here the bslib starter pack: a value box, a markdown card, a data
+table, a scatter plot, and a histogram.</li>
+<li>
+<code><a href="../reference/genui_server.html">genui_server()</a></code> compiles the catalog into tools,
+registers them (plus the built-in lifecycle tools) on the ellmer
+<code>Chat</code>, installs the system prompt, and runs the chat loop
+against the <code><a href="https://posit-dev.github.io/shinychat/r/reference/chat_ui.html" class="external-link">shinychat::chat_ui()</a></code> you placed in the
+sidebar.</li>
+</ul>
+<p>Any ellmer provider works: swap <code><a href="https://ellmer.tidyverse.org/reference/chat_anthropic.html" class="external-link">ellmer::chat_anthropic()</a></code>
+for <code><a href="https://ellmer.tidyverse.org/reference/chat_openai.html" class="external-link">ellmer::chat_openai()</a></code>,
+<code><a href="https://ellmer.tidyverse.org/reference/chat_ollama.html" class="external-link">ellmer::chat_ollama()</a></code>, and so on. Create the
+<code>Chat</code> inside the server function — one per session — so tool
+closures and conversation history are never shared between users.</p>
+</div>
+<div class="section level2">
+<h2 id="defining-a-component">Defining a component<a class="anchor" aria-label="anchor" href="#defining-a-component"></a>
+</h2>
+<p>A component couples the model-facing schema with your rendering
+code:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">histogram</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/genui_component.html">genui_component</a></span><span class="op">(</span></span>
+<span>  name <span class="op">=</span> <span class="st">"histogram"</span>,</span>
+<span>  description <span class="op">=</span> <span class="st">"A histogram of one numeric column with a bin-count slider."</span>,</span>
+<span>  args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    column <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/type_boolean.html" class="external-link">type_enum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span>, <span class="st">"Column to plot."</span><span class="op">)</span>,</span>
+<span>    bins <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/type_boolean.html" class="external-link">type_integer</a></span><span class="op">(</span><span class="st">"Initial number of bins."</span>, required <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  ui <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">id</span>, <span class="va">args</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">ns</span> <span class="op">&lt;-</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/NS.html" class="external-link">NS</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span>
+<span>    <span class="fu">bslib</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/bslib/reference/card.html" class="external-link">card</a></span><span class="op">(</span></span>
+<span>      <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/plotOutput.html" class="external-link">plotOutput</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>      <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/sliderInput.html" class="external-link">sliderInput</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"bins"</span><span class="op">)</span>, <span class="st">"Bins"</span>, <span class="fl">5</span>, <span class="fl">60</span>, <span class="va">args</span><span class="op">$</span><span class="va">bins</span> <span class="op"><a href="https://rdrr.io/r/base/Control.html" class="external-link">%||%</a></span> <span class="fl">30</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">}</span>,</span>
+<span>  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">id</span>, <span class="va">args</span>, <span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/moduleServer.html" class="external-link">moduleServer</a></span><span class="op">(</span><span class="va">id</span>, <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="va">output</span><span class="op">$</span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="op">)</span><span class="op">[[</span><span class="va">args</span><span class="op">$</span><span class="va">column</span><span class="op">]</span><span class="op">]</span>, breaks <span class="op">=</span> <span class="va">input</span><span class="op">$</span><span class="va">bins</span><span class="op">)</span></span>
+<span>      <span class="op">}</span><span class="op">)</span></span>
+<span>    <span class="op">}</span><span class="op">)</span></span>
+<span>  <span class="op">}</span>,</span>
+<span>  check <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">args</span>, <span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">is.numeric</a></span><span class="op">(</span><span class="va">data</span><span class="op">[[</span><span class="va">args</span><span class="op">$</span><span class="va">column</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Column \""</span>, <span class="va">args</span><span class="op">$</span><span class="va">column</span>, <span class="st">"\" is not numeric."</span><span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<ul>
+<li>
+<code>name</code> and <code>description</code> are product surface:
+they are exactly what the model reads when deciding which tool to call.
+Write them like documentation.</li>
+<li>
+<code>args</code> is a named list of ellmer types. A plain string is
+shorthand for <code><a href="https://ellmer.tidyverse.org/reference/type_boolean.html" class="external-link">ellmer::type_string()</a></code>. Because catalogs are
+ordinary R values, you can build them <em>inside</em> the server
+function and ground enums on live facts: above, <code>column</code>
+enumerates the actual column names, so a hallucinated column is rejected
+by schema before your code ever runs.</li>
+<li>
+<code>ui(id, args)</code> returns htmltools tags. <code>id</code> is
+the instance’s module id; namespace embedded inputs and outputs with
+<code>shiny::NS(id)</code>.</li>
+<li>
+<code>server(id, args, data)</code> is optional and wraps
+<code><a href="https://rdrr.io/pkg/shiny/man/moduleServer.html" class="external-link">shiny::moduleServer()</a></code>. <code>data</code> is the reactive
+you passed to <code><a href="../reference/genui_server.html">genui_server()</a></code>. Embedded inputs like the
+slider here are real Shiny inputs wired to this instance’s own module:
+dragging the slider re-renders at Shiny speed with zero LLM traffic. If
+your module creates observers, return them (alone or in a list) so they
+can be destroyed when the instance is updated or removed.</li>
+<li>
+<code>check(args, data)</code> runs after schema validation with the
+current data value. Return <code>NULL</code> to accept or a string to
+reject; the string becomes the tool error the model reads.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="the-component-lifecycle">The component lifecycle<a class="anchor" aria-label="anchor" href="#the-component-lifecycle"></a>
+</h2>
+<p>Every created instance gets a stable id (<code>c1</code>,
+<code>c2</code>, …) that is returned to the model in the tool result.
+Alongside your catalog, four built-in tools are always registered:</p>
+<ul>
+<li>
+<code>update_component(id, args)</code> merges partial arguments
+over the current ones, re-validates, and re-instantiates the module
+inside the instance’s stable shell — same canvas position, no flicker.
+Because the module restarts, embedded input state resets to defaults on
+update; snapshot and restore across updates is future work.</li>
+<li>
+<code>remove_component(id)</code> destroys the instance (and, for
+containers, its children).</li>
+<li>
+<code>clear_canvas()</code> empties the canvas.</li>
+<li>
+<code>get_canvas_state()</code> is read-only: it reports every
+instance with its arguments and the live values of its embedded inputs,
+so the model can see what the user has adjusted before acting.</li>
+</ul>
+<p>The packaged system prompt (see <code><a href="../reference/genui_prompt.html">genui_prompt()</a></code>)
+instructs the model to narrate briefly in chat while placing visuals via
+tools, to reuse <code>update_component</code> when the user refines an
+existing view, and to prefer few, dense components. Add app-specific
+grounding through the <code>context</code> argument — a schema
+description, a few sample rows, a business glossary. Raw data is never
+put in the prompt unless you put it there.</p>
+</div>
+<div class="section level2">
+<h2 id="containers">Containers<a class="anchor" aria-label="anchor" href="#containers"></a>
+</h2>
+<p>A component declared with <code>container = TRUE</code> renders a
+slot other components can target: the model creates the container first,
+then passes its instance id as <code>parent_id</code> when creating
+children. <code><a href="../reference/genui_card_row.html">genui_card_row()</a></code> is the packaged example — a
+titled row that groups value boxes or plots. Removing a container
+removes its children. See <code>inst/examples/02-layout/app.R</code> for
+a full app.</p>
+</div>
+<div class="section level2">
+<h2 id="trace-and-replay">Trace and replay<a class="anchor" aria-label="anchor" href="#trace-and-replay"></a>
+</h2>
+<p>Every validated call appends to an ordered trace of plain,
+serializable lists: the spec of record for the canvas.
+<code><a href="../reference/genui_trace.html">genui_trace()</a></code> gives you a reactive read of it, and
+<code><a href="../reference/genui_replay.html">genui_replay()</a></code> folds a saved trace through the same
+validate-and-execute pipeline to rebuild the canvas — in a fresh
+session, with no LLM configured:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># in the session that built the canvas</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observe.html" class="external-link">observe</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="fu"><a href="../reference/genui_trace.html">genui_trace</a></span><span class="op">(</span><span class="va">session</span><span class="op">)</span><span class="op">(</span><span class="op">)</span>, <span class="st">"canvas-trace.rds"</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># in a later session, no chat anywhere</span></span>
+<span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="../reference/genui_replay.html">genui_replay</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"canvas-trace.rds"</span><span class="op">)</span>,</span>
+<span>    catalog <span class="op">=</span> <span class="va">catalog</span>,</span>
+<span>    target <span class="op">=</span> <span class="st">"canvas"</span>,</span>
+<span>    data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>Instance ids come back identical (id assignment is deterministic and
+ids are never reused). Embedded input values are intentionally
+<em>not</em> recorded: replay restores components with inputs at their
+defaults.</p>
+</div>
+<div class="section level2">
+<h2 id="when-things-go-wrong">When things go wrong<a class="anchor" aria-label="anchor" href="#when-things-go-wrong"></a>
+</h2>
+<p>Every failure while handling a tool call — schema validation,
+<code>check()</code> hooks, rendering errors — becomes a tool error the
+model reads and recovers from. Failed creates roll back completely;
+failed updates leave the existing instance untouched. The Shiny session
+itself never crashes, and the worst case of a prompt injection is an
+ugly dashboard, not code execution. Failures are always written to the
+server log; set <code>options(shinygenui.verbose = TRUE)</code> to also
+log successful canvas operations.</p>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 

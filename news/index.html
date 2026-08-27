@@ -40,10 +40,18 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="shinygenui-development-version">shinygenui (development version)<a class="anchor" aria-label="anchor" href="#shinygenui-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.1.0" id="shinygenui-010">shinygenui 0.1.0<a class="anchor" aria-label="anchor" href="#shinygenui-010"></a></h2>
 <div class="section level3">
-<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
-<ul><li>Initial CRAN submission.</li>
+<h3 id="new-features-0-1-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-0"></a></h3>
+<ul><li>Initial release: catalog-constrained generative UI for Shiny.</li>
+<li>Define components with <code><a href="../reference/genui_component.html">genui_component()</a></code> and collect them with <code><a href="../reference/genui_catalog.html">genui_catalog()</a></code>; each entry compiles to a schema-validated ellmer tool.</li>
+<li>
+<code><a href="../reference/genui_canvas.html">genui_canvas()</a></code> + <code><a href="../reference/genui_server.html">genui_server()</a></code> stream model-composed components into a running app, with built-in <code>update_component</code>, <code>remove_component</code>, <code>clear_canvas</code>, and read-only <code>get_canvas_state</code> lifecycle tools.</li>
+<li>Pure <code><a href="../reference/genui_dispatch.html">genui_dispatch()</a></code> core validates and plans every model-issued call; failures return to the model as tool errors and never crash the session.</li>
+<li>
+<code><a href="../reference/genui_components_bslib.html">genui_components_bslib()</a></code> starter pack (value box, markdown card, data table, scatter plot, histogram with an embedded bin-count slider) and the <code><a href="../reference/genui_card_row.html">genui_card_row()</a></code> container.</li>
+<li>
+<code><a href="../reference/genui_trace.html">genui_trace()</a></code> records every validated call; <code><a href="../reference/genui_replay.html">genui_replay()</a></code> rebuilds a canvas from a saved trace with no LLM configured.</li>
 </ul></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

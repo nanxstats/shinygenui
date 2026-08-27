@@ -1,6 +1,7 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://nanx.me/shinygenui/404.html</loc></url>
 <url><loc>https://nanx.me/shinygenui/AGENTS.html</loc></url>
+<url><loc>https://nanx.me/shinygenui/DESIGN.html</loc></url>
 <url><loc>https://nanx.me/shinygenui/LICENSE-text.html</loc></url>
 <url><loc>https://nanx.me/shinygenui/LICENSE.html</loc></url>
 <url><loc>https://nanx.me/shinygenui/articles/index.html</loc></url>
@@ -8,6 +9,17 @@
 <url><loc>https://nanx.me/shinygenui/authors.html</loc></url>
 <url><loc>https://nanx.me/shinygenui/index.html</loc></url>
 <url><loc>https://nanx.me/shinygenui/news/index.html</loc></url>
+<url><loc>https://nanx.me/shinygenui/reference/genui_call.html</loc></url>
+<url><loc>https://nanx.me/shinygenui/reference/genui_canvas.html</loc></url>
+<url><loc>https://nanx.me/shinygenui/reference/genui_card_row.html</loc></url>
+<url><loc>https://nanx.me/shinygenui/reference/genui_catalog.html</loc></url>
+<url><loc>https://nanx.me/shinygenui/reference/genui_component.html</loc></url>
+<url><loc>https://nanx.me/shinygenui/reference/genui_components_bslib.html</loc></url>
+<url><loc>https://nanx.me/shinygenui/reference/genui_dispatch.html</loc></url>
+<url><loc>https://nanx.me/shinygenui/reference/genui_prompt.html</loc></url>
+<url><loc>https://nanx.me/shinygenui/reference/genui_replay.html</loc></url>
+<url><loc>https://nanx.me/shinygenui/reference/genui_server.html</loc></url>
+<url><loc>https://nanx.me/shinygenui/reference/genui_trace.html</loc></url>
 <url><loc>https://nanx.me/shinygenui/reference/index.html</loc></url>
 <url><loc>https://nanx.me/shinygenui/reference/shinygenui-package.html</loc></url>
 </urlset>
