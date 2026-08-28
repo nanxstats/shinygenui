@@ -2,7 +2,7 @@ version = 1
 okr-version = "0.1.7"
 generated = "2026-08-27T00:00:00Z"
 snapshot = "2026-08-27"
-config-digest = "sha256:0b1a5684c47a7f6331f5e95331934e0e522805c229216d84886ff478f607f84b"
+config-digest = "sha256:1c88e008ec97b0e8ecb5b5f6fa038f3281c85388ba1d6c2d817984a28ebe18f1"
 environment-digest = "sha256:4b1ae339f010c1032948b15a223750d26be065a1a6f7061f4e84ac02a9c07c59"
 
 [[package]]

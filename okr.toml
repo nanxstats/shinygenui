@@ -10,7 +10,7 @@ exclude = []
 gitignore = true
 
 [manifest]
-agents-file = true
+agents-file = false
 
 [packages]
 shiny = "*"
