@@ -15,6 +15,16 @@ The package is similar to Vercel's json-render and Google's A2UI, but has a
 much smaller scope. It uses R, Shiny, and the deployment approaches you already
 use for Shiny apps. You do not need Node, another server, or schemas written by hand.
 
+## See it in action
+
+In this recording, the model turns requests into an interactive `mtcars` dataset
+explorer by choosing components from the app's catalog, adding them to the canvas,
+and updating them as the conversation continues.
+
+<video src="https://github.com/user-attachments/assets/9ce7cbbf-94f3-4205-9b7b-5eda32871b7e" controls width="100%">
+<a href="https://github.com/user-attachments/assets/9ce7cbbf-94f3-4205-9b7b-5eda32871b7e">Watch the mtcars explorer recording.</a>
+</video>
+
 ## Installation
 
 ``` r
