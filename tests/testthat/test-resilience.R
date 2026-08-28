@@ -84,6 +84,8 @@ test_that("a failing ui function leaves creates untouched and updates intact", {
 })
 
 test_that("failures are always logged; successes only when verbose", {
+  skip_if_not_installed("withr")
+
   shiny::testServer(
     engine_module,
     args = list(id = "genui", catalog = test_catalog(), data = function() NULL),

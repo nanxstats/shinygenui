@@ -6,7 +6,7 @@
 \alias{shinygenui-package}
 \title{shinygenui: Generative UI for 'shiny'}
 \description{
-Declarative, catalog-constrained generative user interfaces for 'shiny'. Developers define a finite catalog of typed UI components; end users converse with a large language model that composes, updates, and removes instances of those components on a canvas through schema-validated 'ellmer' tool calls, streamed progressively into the running app. The model never emits code: arguments are plain data validated against the catalog, so the guardrails hold by construction.
+Build interactive user interfaces for 'shiny' applications through a conversation with a large language model (LLM). Developers choose a set of reusable components, and the model arranges and updates those components as the user describes what they need. Each component's inputs are checked before it is shown, and the model supplies data rather than executable code. Applications can also save and replay the sequence of interface changes without contacting a model. For background on generative user interfaces, see Leviathan et al. (2026) \doi{10.48550/arXiv.2604.09577}.
 }
 \seealso{
 Useful links:

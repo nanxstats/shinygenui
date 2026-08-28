@@ -87,3 +87,23 @@ Failures are always logged to the app's server log; set
 operations.
 }
 
+\examples{
+note <- genui_component(
+  name = "note_card",
+  description = "A card showing a short note.",
+  args = list(text = "The note text."),
+  ui = function(id, args) htmltools::p(args$text)
+)
+catalog <- genui_catalog(note)
+chat <- ellmer::chat_openai(
+  model = "gpt-5.6-sol",
+  credentials = function() list(api_key = "not-used")
+)
+shiny::testServer(
+  genui_server,
+  args = list(id = "canvas", catalog = catalog, chat = chat),
+  {
+    stopifnot("note_card" \%in\% names(chat$get_tools()))
+  }
+)
+}

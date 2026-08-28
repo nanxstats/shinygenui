@@ -17,6 +17,26 @@
 #'   validated argument delta). Persist it with [saveRDS()] to replay in a
 #'   later session.
 #' @export
+#' @examples
+#' note <- genui_component(
+#'   name = "note_card",
+#'   description = "A card showing a short note.",
+#'   args = list(text = "The note text."),
+#'   ui = function(id, args) htmltools::p(args$text)
+#' )
+#' catalog <- genui_catalog(note)
+#' chat <- ellmer::chat_openai(
+#'   model = "gpt-5.6-sol",
+#'   credentials = function() list(api_key = "not-used")
+#' )
+#' shiny::testServer(
+#'   genui_server,
+#'   args = list(id = "canvas", catalog = catalog, chat = chat),
+#'   {
+#'     trace <- genui_trace(session)
+#'     stopifnot(identical(trace(), list()))
+#'   }
+#' )
 genui_trace <- function(session = shiny::getDefaultReactiveDomain(), id = NULL) {
   find_genui_store(session, id)$trace
 }
@@ -93,6 +113,28 @@ find_genui_store <- function(session, id, call = rlang::caller_env()) {
 #' @return (Invisibly) a list with reactives `trace` and `instances`
 #'   describing the rebuilt canvas, as in [genui_server()].
 #' @export
+#' @examples
+#' note <- genui_component(
+#'   name = "note_card",
+#'   description = "A card showing a short note.",
+#'   args = list(text = "The note text."),
+#'   ui = function(id, args) htmltools::p(args$text)
+#' )
+#' catalog <- genui_catalog(note)
+#' saved_trace <- list(list(
+#'   op = "create",
+#'   id = "c1",
+#'   component = "note_card",
+#'   args = list(text = "Hello")
+#' ))
+#' shiny::testServer(
+#'   function(input, output, session) {
+#'     suppressWarnings(genui_replay(saved_trace, catalog, target = "canvas"))
+#'   },
+#'   {
+#'     stopifnot(identical(names(session$returned$instances()), "c1"))
+#'   }
+#' )
 genui_replay <- function(
   trace,
   catalog,
