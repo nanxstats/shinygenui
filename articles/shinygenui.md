@@ -34,7 +34,7 @@ server <- function(input, output, session) {
   genui_server(
     "canvas",
     catalog = catalog,
-    chat = ellmer::chat_anthropic(),
+    chat = ellmer::chat_openai(),
     data = reactive(mtcars),
     chat_id = "chat",
     greeting = "Ask me about the mtcars data.",
@@ -63,14 +63,11 @@ The app has three main pieces:
   [`shinychat::chat_ui()`](https://posit-dev.github.io/shinychat/r/reference/chat_ui.html)
   in the sidebar.
 
-Any ellmer provider works here: you can swap
-[`ellmer::chat_anthropic()`](https://ellmer.tidyverse.org/reference/chat_anthropic.html)
-for
-[`ellmer::chat_openai()`](https://ellmer.tidyverse.org/reference/chat_openai.html),
-[`ellmer::chat_ollama()`](https://ellmer.tidyverse.org/reference/chat_ollama.html),
-and so on. Create the `Chat` inside the server function so that each
-session gets its own object. This keeps the conversation and the
-functions used by its tools separate for each user.
+You can swap
+[`ellmer::chat_openai()`](https://ellmer.tidyverse.org/reference/chat_openai.html)
+for any provider `ellmer::chat_*()`. Create the `Chat` inside the server
+function so that each session gets its own object. This keeps the
+conversation and the functions used by its tools separate for each user.
 
 ## Defining a component
 

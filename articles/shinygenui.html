@@ -97,7 +97,7 @@ while the Shiny session keeps running.</p>
 <span>  <span class="fu"><a href="../reference/genui_server.html">genui_server</a></span><span class="op">(</span></span>
 <span>    <span class="st">"canvas"</span>,</span>
 <span>    catalog <span class="op">=</span> <span class="va">catalog</span>,</span>
-<span>    chat <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_anthropic.html" class="external-link">chat_anthropic</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    chat <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_openai.html" class="external-link">chat_openai</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>    data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span>,</span>
 <span>    chat_id <span class="op">=</span> <span class="st">"chat"</span>,</span>
 <span>    greeting <span class="op">=</span> <span class="st">"Ask me about the mtcars data."</span>,</span>
@@ -125,12 +125,11 @@ them to the ellmer <code>Chat</code>. It also adds tools for changing
 the canvas, installs the system prompt, and connects the model to the
 <code><a href="https://posit-dev.github.io/shinychat/r/reference/chat_ui.html" class="external-link">shinychat::chat_ui()</a></code> in the sidebar.</li>
 </ul>
-<p>Any ellmer provider works here: you can swap
-<code><a href="https://ellmer.tidyverse.org/reference/chat_anthropic.html" class="external-link">ellmer::chat_anthropic()</a></code> for
-<code><a href="https://ellmer.tidyverse.org/reference/chat_openai.html" class="external-link">ellmer::chat_openai()</a></code>, <code><a href="https://ellmer.tidyverse.org/reference/chat_ollama.html" class="external-link">ellmer::chat_ollama()</a></code>,
-and so on. Create the <code>Chat</code> inside the server function so
-that each session gets its own object. This keeps the conversation and
-the functions used by its tools separate for each user.</p>
+<p>You can swap <code><a href="https://ellmer.tidyverse.org/reference/chat_openai.html" class="external-link">ellmer::chat_openai()</a></code> for any provider
+<code>ellmer::chat_*()</code>. Create the <code>Chat</code> inside the
+server function so that each session gets its own object. This keeps the
+conversation and the functions used by its tools separate for each
+user.</p>
 </div>
 <div class="section level2">
 <h2 id="defining-a-component">Defining a component<a class="anchor" aria-label="anchor" href="#defining-a-component"></a>

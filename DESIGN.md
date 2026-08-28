@@ -195,7 +195,7 @@ provides reactive access to the trace.
 - The trace never records values from embedded inputs. Replay restores
   their defaults.
 - ellmer provides support for multiple model providers. Examples use
-  `chat_anthropic()` by default.
+  `chat_openai()` by default.
 
 ## Open questions
 

@@ -63,7 +63,7 @@ server <- function(input, output, session) {
   genui_server(
     "canvas",
     catalog = catalog,
-    chat = ellmer::chat_anthropic(), # Any ellmer provider works
+    chat = ellmer::chat_openai(), # Any ellmer provider works
     data = reactive(mtcars),
     chat_id = "chat",
     system_prompt = genui_prompt(catalog, context = "The data is mtcars.")
