@@ -6,8 +6,7 @@
 # the second canvas: every component comes back (embedded inputs at their
 # defaults) without a single model call.
 #
-# Requires an Anthropic API key in ANTHROPIC_API_KEY; any ellmer provider
-# works.
+# Requires an OpenAI API key in OPENAI_API_KEY; any ellmer provider works.
 #
 # Try:
 #   1. "Create a row of KPIs: average mpg, average hp, and max wt."
@@ -41,7 +40,7 @@ server <- function(input, output, session) {
     genui_components_bslib(data = mtcars)
   )
 
-  chat <- ellmer::chat_anthropic()
+  chat <- ellmer::chat_openai()
 
   handles <- genui_server(
     "live",

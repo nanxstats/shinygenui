@@ -90,7 +90,7 @@ genui_server <- function(
 ) {
   check_catalog(catalog)
   if (!inherits(chat, "Chat")) {
-    genui_abort("{.arg chat} must be an ellmer {.cls Chat} object, like {.code ellmer::chat_anthropic()}.")
+    genui_abort("{.arg chat} must be an ellmer {.cls Chat} object, like {.code ellmer::chat_openai()}.")
   }
   if (!is.null(chat_id) && !is_string(chat_id)) {
     genui_abort("{.arg chat_id} must be a single string or `NULL`.")

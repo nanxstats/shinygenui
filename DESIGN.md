@@ -170,7 +170,7 @@ the rebuilt components have the same ids. Shiny inputs return to their default v
 - The trace never records values from embedded inputs. Replay restores their
   defaults.
 - ellmer provides support for multiple model providers. Examples use
-  `chat_anthropic()` by default.
+  `chat_openai()` by default.
 
 ## Open questions
 
