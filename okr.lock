@@ -1,9 +1,9 @@
 version = 1
-okr-version = "0.1.7"
+okr-version = "0.1.8"
 generated = "2026-08-27T00:00:00Z"
 snapshot = "2026-08-27"
 config-digest = "sha256:1c88e008ec97b0e8ecb5b5f6fa038f3281c85388ba1d6c2d817984a28ebe18f1"
-environment-digest = "sha256:4b1ae339f010c1032948b15a223750d26be065a1a6f7061f4e84ac02a9c07c59"
+environment-digest = "sha256:1e2483e704d2304560d9e1163a8ea20f583441040efbde6930f9ae3351a812f1"
 
 [[package]]
 name = "DT"
@@ -178,10 +178,10 @@ license = "GPL-3"
 [[reference]]
 name = "a2ui"
 source = "github::a2ui-project/a2ui"
-commit = "18ae5afe3aa32bd24270ec87100b9031ba95561d"
+commit = "b356d61b30652b33d738dcf42a4ccfa4eb099a86"
 fetch-method = "forge-tarball"
-artifact-digest = "sha256:a646015c853f9f1627b5668efc44a2d9f65cee506c547567dacff60d8523dd2f"
-tree-digest = "sha256:732910097bd843a851b9c5868d01acabdcc451e663e6d307f3f542a6f94910b7"
+artifact-digest = "sha256:c043e6751679295f8d569934ba9b452256ed4c0553d57117c7250cdbc590ae23"
+tree-digest = "sha256:31afc8e72d40f0b62fdd1c3edba086bfa72064150b6da8108096dc52f997b33c"
 license = "MIT"
 
 [[reference]]
