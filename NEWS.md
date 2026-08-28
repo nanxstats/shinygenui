@@ -5,6 +5,8 @@
 - Example and acceptance test apps now read their model and reasoning effort
   from the required `SHINYGENUI_MODEL` and `SHINYGENUI_EFFORT` environment
   variables instead of relying on defaults (#9).
+- The `01-mtcars-explorer` example now offers prompt buttons above the
+  chat composer. A click fills and focuses the composer without submitting (#10).
 
 # shinygenui 0.1.0
 
