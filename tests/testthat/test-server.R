@@ -2,7 +2,7 @@
 # object that never talks to the network (tools are invoked directly).
 
 local_chat <- function() {
-  ellmer::chat_openai(model = "gpt-5", credentials = function() list(api_key = "not-a-real-key"))
+  ellmer::chat_openai(model = "gpt-5.6-sol", credentials = function() list(api_key = "not-a-real-key"))
 }
 
 test_that("genui_server registers tools and installs the system prompt", {

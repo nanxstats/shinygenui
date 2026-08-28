@@ -7,7 +7,7 @@ engine_module <- function(id, catalog, data = NULL) {
 
 test_that("genui_trace exposes the trace reactive from the session store", {
   chat <- ellmer::chat_openai(
-    model = "gpt-5",
+    model = "gpt-5.6-sol",
     credentials = function() list(api_key = "not-a-real-key")
   )
   shiny::testServer(
