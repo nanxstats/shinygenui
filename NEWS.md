@@ -2,16 +2,17 @@
 
 ## New features
 
-- Initial release: catalog-constrained generative UI for Shiny.
-- Define components with `genui_component()` and collect them with
-  `genui_catalog()`; each entry compiles to a schema-validated ellmer tool.
-- `genui_canvas()` + `genui_server()` stream model-composed components into
-  a running app, with built-in `update_component`, `remove_component`,
-  `clear_canvas`, and read-only `get_canvas_state` lifecycle tools.
-- Pure `genui_dispatch()` core validates and plans every model-issued call;
-  failures return to the model as tool errors and never crash the session.
-- `genui_components_bslib()` starter pack (value box, markdown card, data
-  table, scatter plot, histogram with an embedded bin-count slider) and the
-  `genui_card_row()` container.
-- `genui_trace()` records every validated call; `genui_replay()` rebuilds a
-  canvas from a saved trace with no LLM configured.
+- Use `genui_component()` to define a component and `genui_catalog()` to
+  collect components into a catalog. Each component becomes an ellmer tool
+  with validated arguments.
+- Use `genui_canvas()` and `genui_server()` to let the model add components to
+  a running app. The included tools let it update or remove a component,
+  clear the canvas, and inspect the current canvas.
+- Every call from the model passes through `genui_dispatch()` before it can
+  change the canvas. If a call fails, the model receives the error and the
+  Shiny session keeps running.
+- `genui_components_bslib()` provides a value box, Markdown card, data table,
+  scatter plot, and histogram with a slider for the number of bins.
+  `genui_card_row()` provides a container for arranging these components.
+- `genui_trace()` records each successful call. `genui_replay()` can rebuild
+  the canvas from that record without an LLM.

@@ -1,5 +1,5 @@
-# Session logging. Failures are always logged (they end up in app server
-# logs, e.g. on Posit Connect, where they are the main debugging signal);
+# Session logging. Failures are always logged (they end up in app server logs,
+# for example, on Posit Connect, where they are the main debugging signal);
 # successful canvas operations are logged only when
 # options(shinygenui.verbose = TRUE).
 #
