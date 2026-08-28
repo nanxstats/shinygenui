@@ -1,3 +1,11 @@
+# shinygenui (development version)
+
+## Improvements
+
+- Example and acceptance test apps now read their model and reasoning effort
+  from the required `SHINYGENUI_MODEL` and `SHINYGENUI_EFFORT` environment
+  variables instead of relying on defaults (#9).
+
 # shinygenui 0.1.0
 
 ## New features

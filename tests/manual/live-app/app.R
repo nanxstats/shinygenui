@@ -2,6 +2,17 @@
 # shinytest2 runs this with the app directory as the working directory, so
 # the package root is three levels up.
 readRenviron("../../../.env")
+required_env <- c("OPENAI_API_KEY", "SHINYGENUI_MODEL", "SHINYGENUI_EFFORT")
+missing_env <- required_env[!nzchar(Sys.getenv(required_env))]
+if (length(missing_env) > 0) {
+  stop(
+    sprintf(
+      "Set these variables in .env: %s",
+      paste(missing_env, collapse = ", ")
+    ),
+    call. = FALSE
+  )
+}
 pkgload::load_all("../../..", quiet = TRUE)
 
 library(shiny)
@@ -25,8 +36,10 @@ ui <- page_sidebar(
 server <- function(input, output, session) {
   catalog <- genui_catalog(genui_components_bslib(data = mtcars))
   chat <- ellmer::chat_openai(
-    model = Sys.getenv("SHINYGENUI_LIVE_MODEL", "gpt-5.6-sol"),
-    params = ellmer::params(reasoning_effort = "medium"),
+    model = Sys.getenv("SHINYGENUI_MODEL"),
+    params = ellmer::params(
+      reasoning_effort = Sys.getenv("SHINYGENUI_EFFORT")
+    ),
     echo = "none"
   )
   genui_server(

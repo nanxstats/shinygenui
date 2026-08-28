@@ -7,10 +7,18 @@
 
 stopifnot(file.exists("DESCRIPTION"))
 readRenviron(".env")
-stopifnot(nzchar(Sys.getenv("OPENAI_API_KEY")))
+required_env <- c("OPENAI_API_KEY", "SHINYGENUI_MODEL", "SHINYGENUI_EFFORT")
+missing_env <- required_env[!nzchar(Sys.getenv(required_env))]
+if (length(missing_env) > 0) {
+  stop(
+    sprintf(
+      "Set these variables in .env: %s",
+      paste(missing_env, collapse = ", ")
+    ),
+    call. = FALSE
+  )
+}
 devtools::load_all(".", quiet = TRUE)
-
-live_model <- Sys.getenv("SHINYGENUI_LIVE_MODEL", "gpt-5.6-sol")
 
 pass <- function(ok, label) {
   cat(sprintf("[%s] %s\n", if (isTRUE(ok)) "PASS" else "FAIL", label))
@@ -23,8 +31,10 @@ failures <- 0L
 catalog <- genui_catalog(genui_components_bslib(data = NULL))
 
 chat <- ellmer::chat_openai(
-  model = live_model,
-  params = ellmer::params(reasoning_effort = "medium"),
+  model = Sys.getenv("SHINYGENUI_MODEL"),
+  params = ellmer::params(
+    reasoning_effort = Sys.getenv("SHINYGENUI_EFFORT")
+  ),
   echo = "none"
 )
 

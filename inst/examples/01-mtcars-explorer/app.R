@@ -6,13 +6,29 @@
 # grounded on mtcars, so hallucinated columns come back as tool errors the
 # model corrects itself.
 #
-# Requires an OpenAI API key in OPENAI_API_KEY. Any ellmer provider works.
+# Requires OPENAI_API_KEY, SHINYGENUI_MODEL, and SHINYGENUI_EFFORT. Load them
+# from a .env file before running the app; see the package README.
 #
 # Try, in order:
 #   1. "Show mpg vs. hp, and a value box with the average mpg."
 #   2. "Color the scatter by cylinders and drop the value box."
 #   3. "Add a histogram of hp."           (then drag the bins slider)
 #   4. "Add a scatter of mpg vs. gear ratio."  (watch it recover)
+
+if (file.exists(".env")) {
+  readRenviron(".env")
+}
+required_env <- c("OPENAI_API_KEY", "SHINYGENUI_MODEL", "SHINYGENUI_EFFORT")
+missing_env <- required_env[!nzchar(Sys.getenv(required_env))]
+if (length(missing_env) > 0) {
+  stop(
+    sprintf(
+      "Set these variables in .env: %s",
+      paste(missing_env, collapse = ", ")
+    ),
+    call. = FALSE
+  )
+}
 
 library(shiny)
 library(bslib)
@@ -43,7 +59,13 @@ server <- function(input, output, session) {
   catalog <- genui_catalog(genui_components_bslib(data = mtcars))
 
   # One Chat per session: create it here, never at the top level.
-  chat <- ellmer::chat_openai()
+  chat <- ellmer::chat_openai(
+    model = Sys.getenv("SHINYGENUI_MODEL"),
+    params = ellmer::params(
+      reasoning_effort = Sys.getenv("SHINYGENUI_EFFORT")
+    ),
+    echo = "none"
+  )
 
   genui_server(
     "canvas",
