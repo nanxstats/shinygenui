@@ -1,6 +1,6 @@
 # Starter component pack built on bslib
 
-A small, general-purpose catalog: a value box, a markdown card, a data
+A small, general-purpose catalog: a value box, a Markdown card, a data
 table, a scatter plot, and a histogram with an embedded bin-count slider
 (the reference interactive component: dragging the slider re-renders at
 Shiny speed with no LLM round trip). Pass the result to

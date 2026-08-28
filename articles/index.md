@@ -2,4 +2,5 @@
 
 ### All vignettes
 
-- [shinygenui](https://nanx.me/shinygenui/articles/shinygenui.md):
+- [Get started with
+  shinygenui](https://nanx.me/shinygenui/articles/shinygenui.md):

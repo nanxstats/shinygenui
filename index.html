@@ -58,20 +58,8 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>shinygenui brings declarative generative UI to Shiny. You define a finite catalog of typed UI components as guardrails. End users of your deployed app talk to an LLM through a chat panel, and the model answers by composing instances of those components, streamed progressively onto a canvas. The model can also update and remove components it previously created, so the generated view is conversationally mutable, not append-only.</p>
-<p>It is the R/Shiny analogue of Vercel’s json-render and Google’s A2UI but intentionally narrower: one language, one framework, one deployment story. An regular Shiny app (deployed on Posit Connect for example), with no sidecar servers, no Node, and no schemas or JSON authored manually.</p>
-<div class="section level2">
-<h2 id="how-it-stays-safe">How it stays safe<a class="anchor" aria-label="anchor" href="#how-it-stays-safe"></a>
-</h2>
-<ul>
-<li>
-<strong>Tool calls, not code generation.</strong> Every catalog entry compiles to an <a href="https://ellmer.tidyverse.org" class="external-link">ellmer</a> tool. The model “renders” a component by calling its tool with typed arguments; it never emits R code, and the package never calls <code><a href="https://rdrr.io/r/base/eval.html" class="external-link">eval()</a></code> or <code><a href="https://rdrr.io/r/base/parse.html" class="external-link">parse()</a></code> on model output. Arguments are data, interpreted only by your component functions.</li>
-<li>
-<strong>Grounded, per-session schemas.</strong> Catalogs can be built inside the server function, so argument types can enumerate live facts. For example, the columns of the active dataset as enum values. A hallucinated column is a schema violation the model has to correct.</li>
-<li>
-<strong>Error feedback loop.</strong> Validation and rendering failures go back to the model as tool errors with actionable messages; the session never crashes. A prompt-injection worst case is an ugly dashboard, not code execution.</li>
-</ul>
-</div>
+<p>shinygenui lets you add generative UI to Shiny apps. As the app developer, you choose a fixed set of UI components and describe the arguments that each component accepts. Together, these components form a catalog. When someone asks a question in the chat panel, the model chooses components from the catalog and adds them to a canvas. It can also update or remove components as the conversation continues.</p>
+<p>The package is similar to Vercel’s json-render and Google’s A2UI, but has a much smaller scope. It uses R, Shiny, and the deployment approaches you already use for Shiny apps. You do not need Node, another server, or schemas written by hand.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -80,9 +68,21 @@
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"nanxstats/shinygenui"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="how-it-works-safely">How it works safely<a class="anchor" aria-label="anchor" href="#how-it-works-safely"></a>
+</h2>
+<ul>
+<li>
+<strong>The model calls tools instead of writing code.</strong> Each catalog entry becomes an <a href="https://ellmer.tidyverse.org" class="external-link">ellmer</a> tool with typed arguments. The model calls these tools with data. It never writes R code, and shinygenui never calls <code><a href="https://rdrr.io/r/base/eval.html" class="external-link">eval()</a></code> or <code><a href="https://rdrr.io/r/base/parse.html" class="external-link">parse()</a></code> on model output.</li>
+<li>
+<strong>The catalog can reflect the current session.</strong> If you create the catalog inside the server function, its argument types can use values that are known at that point. For example, an argument can only accept names from the current dataset. If the model invents a column, validation rejects it.</li>
+<li>
+<strong>Errors return to the model.</strong> If validation or rendering fails, the model receives an error that explains what went wrong and can try again. The Shiny session keeps running. Even if a prompt injection changes what the model asks for, it cannot make the package run code outside the catalog.</li>
+</ul>
+</div>
+<div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>A complete app: chat sidebar, canvas, and a starter catalog grounded on <code>mtcars</code>. Ask for “mpg vs. hp and a value box with the average mpg”, then “color the scatter by cylinders”. The existing plot updates in place.</p>
+<p>Here is a complete app with a chat sidebar, a canvas, and a catalog based on <code>mtcars</code>. Start by asking for a plot of <code>mpg</code> against <code>hp</code> and a value box with the average <code>mpg</code>. Then ask the model to color the points by cylinder count. It updates the existing plot in place.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.posit.co/" class="external-link">shiny</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/bslib/" class="external-link">bslib</a></span><span class="op">)</span></span>
@@ -99,7 +99,7 @@
 <span>  <span class="fu"><a href="reference/genui_server.html">genui_server</a></span><span class="op">(</span></span>
 <span>    <span class="st">"canvas"</span>,</span>
 <span>    catalog <span class="op">=</span> <span class="va">catalog</span>,</span>
-<span>    chat <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_anthropic.html" class="external-link">chat_anthropic</a></span><span class="op">(</span><span class="op">)</span>, <span class="co"># any ellmer provider works</span></span>
+<span>    chat <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_anthropic.html" class="external-link">chat_anthropic</a></span><span class="op">(</span><span class="op">)</span>, <span class="co"># Any ellmer provider works</span></span>
 <span>    data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span>,</span>
 <span>    chat_id <span class="op">=</span> <span class="st">"chat"</span>,</span>
 <span>    system_prompt <span class="op">=</span> <span class="fu"><a href="reference/genui_prompt.html">genui_prompt</a></span><span class="op">(</span><span class="va">catalog</span>, context <span class="op">=</span> <span class="st">"The data is mtcars."</span><span class="op">)</span></span>
@@ -107,8 +107,8 @@
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></code></pre></div>
-<p>The starter pack includes a histogram whose bin-count slider is a live Shiny input embedded in the generated component: dragging it re-renders instantly, with no LLM round trip.</p>
-<p>Defining your own component is one call:</p>
+<p>The included components have the same interactive behavior as any other Shiny UI. For example, the histogram has a slider for the number of bins. Moving the slider redraws the plot immediately without another request to the model.</p>
+<p>You can define your own component with <code><a href="reference/genui_component.html">genui_component()</a></code>:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/genui_component.html">genui_component</a></span><span class="op">(</span></span>
 <span>  name <span class="op">=</span> <span class="st">"value_box"</span>,</span>
@@ -117,19 +117,27 @@
 <span>    title <span class="op">=</span> <span class="st">"Short label above the value."</span>,</span>
 <span>    column <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/type_boolean.html" class="external-link">type_enum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span>, <span class="st">"Column to summarize."</span><span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  ui <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">id</span>, <span class="va">args</span><span class="op">)</span> <span class="op">{</span> <span class="va">...</span> <span class="op">}</span>,       <span class="co"># htmltools tags; NS(id) for inputs</span></span>
-<span>  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">id</span>, <span class="va">args</span>, <span class="va">data</span><span class="op">)</span> <span class="op">{</span> <span class="va">...</span> <span class="op">}</span> <span class="co"># optional moduleServer()</span></span>
+<span>  ui <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">id</span>, <span class="va">args</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">...</span></span>
+<span>  <span class="op">}</span>, <span class="co"># Return htmltools tags</span></span>
+<span>  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">id</span>, <span class="va">args</span>, <span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">...</span></span>
+<span>  <span class="op">}</span> <span class="co"># Optional Shiny module</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Runnable example apps live in <code>inst/examples/</code>: <code>01-mtcars-explorer</code> (the basics) and <code>02-layout</code> (container rows, plus rebuilding a canvas from its trace with <code><a href="reference/genui_replay.html">genui_replay()</a></code>, no LLM required).</p>
+<p>The <code>inst/examples/</code> directory contains two runnable apps:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/runApp.html" class="external-link">runApp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples/01-mtcars-explorer/"</span>, package <span class="op">=</span> <span class="st">"shinygenui"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/runApp.html" class="external-link">runApp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples/02-layout/"</span>, package <span class="op">=</span> <span class="st">"shinygenui"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><code>01-mtcars-explorer</code> introduces the basics. <code>02-layout</code> shows how to group components in rows and rebuild a canvas from its saved history with <code><a href="reference/genui_replay.html">genui_replay()</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="learn-more">Learn more<a class="anchor" aria-label="anchor" href="#learn-more"></a>
 </h2>
 <ul>
 <li>
-<code><a href="articles/shinygenui.html">vignette("shinygenui")</a></code> walks through the full model: catalogs, grounded schemas, lifecycle tools, embedded interactivity, and trace/replay.</li>
+<code><a href="articles/shinygenui.html">vignette("shinygenui")</a></code> explains catalogs, argument validation, updates, interactive components, and replay.</li>
 <li>
-<code>DESIGN.md</code> in the repository documents the architecture.</li>
+<a href="https://nanx.me/shinygenui/DESIGN.html"><code>DESIGN.md</code></a> documents the architecture.</li>
 </ul>
 </div>
 <div class="section level2">

@@ -41,83 +41,91 @@
 
 <div id="shinygenui-design" class="section level1">
 
-<p>Declarative, catalog-constrained generative UI for Shiny. The app developer defines a finite catalog of components; end users chat with an LLM that composes, updates, and removes instances of those components on a canvas, streamed progressively into a plain Shiny app. The R/Shiny analogue of Vercel’s json-render and Google’s A2UI, narrowed to one language, one framework, one deployment story.</p>
+<p>shinygenui lets a language model build a Shiny interface without letting it write UI code. The app developer provides a fixed catalog of components. When someone uses the chat, the model can create, update, and remove instances of those components on a canvas. Components appear as the model continues its response. The package is similar to Vercel’s json-render and Google’s A2UI, but focuses on one language, one framework, and the usual ways of deploying a Shiny app.</p>
 <div class="section level2">
 <h2 id="layers">Layers<a class="anchor" aria-label="anchor" href="#layers"></a></h2>
 <ol style="list-style-type: decimal"><li>
-<strong>Pure core</strong> (no Shiny, no LLM): <code><a href="reference/genui_component.html">genui_component()</a></code>, <code><a href="reference/genui_catalog.html">genui_catalog()</a></code>, <code><a href="reference/genui_dispatch.html">genui_dispatch()</a></code>, argument validation against ellmer types. Fully unit tested with hand-built fake tool calls.</li>
+<strong>Pure core</strong>: <code><a href="reference/genui_component.html">genui_component()</a></code>, <code><a href="reference/genui_catalog.html">genui_catalog()</a></code>, and <code><a href="reference/genui_dispatch.html">genui_dispatch()</a></code> define components and validate their arguments against ellmer types. This layer does not depend on Shiny or an LLM. Unit tests use tool calls created by hand.</li>
 <li>
-<strong>Session state</strong>: <code>GenuiRegistry</code> (R6). Holds instances (id, component name, current args, parent id, observer handles, public-reactives hook), the id counter, and the ordered trace. State transitions only; no DOM.</li>
+<strong>Session state</strong>: <code>GenuiRegistry</code> is an R6 object that stores each instance’s id, component name, current arguments, parent id, observer handles, and any reactives returned by its server. It also stores the id counter and the ordered trace. This layer changes R state but does not change the DOM.</li>
 <li>
-<strong>Shiny executor</strong>: turns dispatch plans into <code>insertUI()</code> / <code>removeUI()</code> calls and module-server instantiations, always with an explicit <code>session</code>.</li>
+<strong>Shiny executor</strong>: this layer turns a plan from <code><a href="reference/genui_dispatch.html">genui_dispatch()</a></code> into calls to <code>insertUI()</code> and <code>removeUI()</code>, then starts component modules. Every operation receives the Shiny session explicitly.</li>
 <li>
-<strong>LLM wiring</strong>: catalog -&gt; <code><a href="https://ellmer.tidyverse.org/reference/tool.html" class="external-link">ellmer::tool()</a></code> compilation, built-in lifecycle tools, prompt assembly (whisker template), shinychat streaming loop.</li>
-</ol><p>Objects: R6 for stateful classes (<code>GenuiRegistry</code>), plain S3 lists for declarative data (<code>genui_component</code>, <code>genui_catalog</code>, plans, trace entries), ellmer’s S7 <code>ContentToolResult</code> for tool results — mirroring querychat’s split.</p>
+<strong>LLM support</strong>: this layer turns the catalog into <code><a href="https://ellmer.tidyverse.org/reference/tool.html" class="external-link">ellmer::tool()</a></code> objects, adds the tools supplied by shinygenui, builds the system prompt with whisker, and runs the shinychat streaming loop.</li>
+</ol><p>Stateful objects, such as <code>GenuiRegistry</code>, use R6. Declarative values, such as components, catalogs, plans, and trace entries, are plain S3 lists. Tool results use ellmer’s S7 <code>ContentToolResult</code> class. This follows the same broad division of responsibilities used in querychat.</p>
 </div>
 <div class="section level2">
 <h2 id="data-flow">Data flow<a class="anchor" aria-label="anchor" href="#data-flow"></a></h2>
-<pre><code>user message --- shinychat --&gt; chat$stream_async(stream = "content")  [ExtendedTask]
-  --&gt; model streams narrative text --&gt; chat_append() renders it
-  --&gt; model emits tool call (schema-validated args, JSON on the wire only)
-        --&gt; compiled tool fn: normalize to a genui_call
-              --&gt; genui_dispatch(catalog, call, state)  [pure]
-                    validates: component exists, ids exist, args well-typed,
-                    semantic check() hook passes -&gt; returns a *plan*
-                    (create/update/remove/clear + resolved id, merged args,
-                    target selector) or signals a classed genui error
-              --&gt; registry records the transition + appends trace entry
-              --&gt; executor: insertUI(immediate = TRUE, session = session),
-                    withReactiveDomain(session, component$server(id, args, data))
-        --&gt; tool returns ContentToolResult(value = "Created c1 (scatter_plot)",
-              extra = display metadata for shinychat's tool display)
-  --&gt; model sees the instance id, continues narrating / calling tools</code></pre>
-<p>Errors anywhere inside the tool fn (dispatch validation, <code>check()</code> hook, rendering) propagate as ordinary R conditions; ellmer’s tool invoker catches them and returns <code>ContentToolResult(error = ...)</code> to the model, which self-corrects in its next turn. The Shiny session never crashes; the worst case is an ugly dashboard. The model never emits R code and the package never calls <code><a href="https://rdrr.io/r/base/eval.html" class="external-link">eval()</a></code>/<code><a href="https://rdrr.io/r/base/parse.html" class="external-link">parse()</a></code> on model output — arguments are data, interpreted only by developer-written component functions.</p>
-<p>ellmer invokes tools when the assistant turn that requested them completes, then loops for a follow-up turn. Because each validated call inserts UI <code>immediate = TRUE</code> from inside the async chain, components pop onto the canvas mid-conversation while the surrounding <code>chat_append()</code> stream is still open — progressive rendering without any custom transport.</p>
+<pre><code>user message → shinychat → chat$stream_async(stream = "content") [ExtendedTask]
+  → narrative text from model → chat_append() displays it
+  → tool call from model (arguments already checked against the tool schema)
+      → compiled tool function turns the arguments into a genui_call
+          → genui_dispatch(catalog, call, state)
+              checks the component, ids, argument types, and check() result
+              returns a plan for create, update, remove, or clear
+          → registry applies the change and adds a trace entry
+          → executor calls insertUI(..., immediate = TRUE, session = session)
+              and withReactiveDomain(session, component$server(...))
+      → tool returns ContentToolResult with the id and display information
+  → model receives the id and may continue with text or more tool calls</code></pre>
+<p>If validation, <code>check()</code>, or rendering fails, the tool function lets the R condition propagate. ellmer catches the condition and returns its message to the model as a tool error. The model can then correct its request in the next turn. The error does not crash the Shiny session.</p>
+<p>The model never writes R code, and shinygenui never calls <code><a href="https://rdrr.io/r/base/eval.html" class="external-link">eval()</a></code> or <code><a href="https://rdrr.io/r/base/parse.html" class="external-link">parse()</a></code> on model output. Tool arguments are data that only the component functions supplied by the app developer can interpret.</p>
+<p>ellmer runs tools after the assistant turn that requested them is complete, then begins another assistant turn. Each valid tool call uses <code>immediate = TRUE</code>, so its UI can appear while <code>chat_append()</code> is still displaying the surrounding response. This gives progressive rendering without another transport layer.</p>
 </div>
 <div class="section level2">
 <h2 id="instances-and-lifecycle">Instances and lifecycle<a class="anchor" aria-label="anchor" href="#instances-and-lifecycle"></a></h2>
-<p>Every instance gets a stable id <code>c1, c2, ...</code> (counter lives in the registry) and renders inside a stable shell <code>div(id = ns("shell-c1"))</code> appended to the canvas <code>div(id = ns("canvas"))</code>. The component’s module id is the instance id, scoped under the genui module’s namespace, so embedded inputs are collision-free and interaction re-renders at Shiny speed with zero LLM round trips.</p>
+<p>Each instance receives an id such as <code>c1</code> or <code>c2</code>. The registry owns the counter, and it never reuses an id. The instance renders inside a shell such as <code>div(id = ns("shell-c1"))</code>, which is appended to <code>div(id = ns("canvas"))</code>. The component’s module id is the instance id inside the namespace of the shinygenui module. This prevents input ids from colliding. Once a component is present, its inputs respond through Shiny without another request to the model.</p>
 <ul><li>
-<strong>create</strong>: dispatch assigns the next id; executor inserts the shell into the canvas (or a container instance’s slot when <code>parent_id</code> is given) and runs the component’s <code>server(id, args, data)</code> under the module session.</li>
+<strong>Create</strong>: dispatch assigns the next id. The executor inserts the shell in the canvas, or in a container when <code>parent_id</code> is supplied, and then runs <code>server(id, args, data)</code> in the module session.</li>
 <li>
-<strong>update</strong>: <code>update_component(id, args)</code> — dispatch merges the partial args over the current args (<code><a href="https://rdrr.io/r/utils/modifyList.html" class="external-link">modifyList()</a></code>), re-validates, and the executor destroys the instance’s observers, empties the shell (<code>removeUI</code> on its children), and re-instantiates UI + server with merged args. The shell never moves, so position is preserved and there is no flicker. In v0.1 embedded input state resets to defaults on update (the module is re-instantiated); snapshot/restore of input values across updates is explicitly future work.</li>
+<strong>Update</strong>: <code>update_component(id, args)</code> uses <code><a href="https://rdrr.io/r/utils/modifyList.html" class="external-link">modifyList()</a></code> to combine the supplied arguments with the current arguments, then validates the result. The executor destroys the instance’s observers, removes the contents of the shell, and creates its UI and server again. The shell and its position do not change. In version 0.1, Shiny inputs return to their defaults after an update because the module starts again. Preserving those values is future work.</li>
 <li>
-<strong>remove / clear</strong>: destroy observers (children first for containers), then <code>removeUI()</code> the shell(s).</li>
-</ul><p><strong>Observer teardown contract</strong>: a component <code>server</code> function returns its moduleServer result; any observers included in that returned value (a single observer or nested in a list) are collected by the registry and <code>$destroy()</code>ed on update/remove. A returned <code>reactives</code> element is stored keyed by instance id — the v0.2 hook for cross-component reactivity (a single blessed filtered-data channel, not arbitrary pub/sub); nothing reads it in v0.1. Known Shiny limitation: output render functions cannot be truly unregistered. On update we reuse the same ids, so re-registration replaces them; on remove, orphaned outputs stay suspended with no bound DOM element, which is acceptable.</p>
+<strong>Remove and clear</strong>: the executor destroys observers and then removes the relevant shells. For a container, it removes children before their parent.</li>
+</ul><div class="section level3">
+<h3 id="cleaning-up-observers">Cleaning up observers<a class="anchor" aria-label="anchor" href="#cleaning-up-observers"></a></h3>
+<p>A component’s <code>server</code> function returns the result of <code>moduleServer()</code>. The registry finds any observers in that value, including observers nested inside lists, and calls <code>$destroy()</code> on them when the component is updated or removed.</p>
+<p>If the returned value has an element named <code>reactives</code>, the registry stores it under the instance id. This is a planned hook for version 0.2. It provides one supported channel for sharing filtered data between components instead of a general publish and subscribe system. Nothing reads these values in version 0.1.</p>
+<p>Shiny cannot unregister output render functions. On update, shinygenui uses the same ids, so the new render functions replace the old ones. On removal, the old outputs remain suspended because there is no longer a DOM element bound to them.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="tools-and-schemas">Tools and schemas<a class="anchor" aria-label="anchor" href="#tools-and-schemas"></a></h2>
-<p>Each catalog entry compiles to an <code><a href="https://ellmer.tidyverse.org/reference/tool.html" class="external-link">ellmer::tool()</a></code> whose formals are generated from the declared arg names (ellmer requires formals ↔︎ arguments to match). Catalogs may be built per session inside the server function, so arg types can enumerate live facts (e.g. dataset columns as <code>type_enum</code> values) — a hallucinated column is a schema violation the model must correct. Three built-ins ride alongside: <code>update_component</code>, <code>remove_component</code>, <code>clear_canvas</code>. Because ellmer cannot express per-component union schemas, <code>update_component</code> takes <code>args</code> as a JSON object <em>string</em>; it is parsed with jsonlite (data, never code) and validated server-side against the component’s declared types (enum membership, scalar/array kinds) — same guardrail, enforced in dispatch instead of by the provider. Reserved arg names: <code>parent_id</code> (auto-added to every component when the catalog contains containers), <code>id</code>.</p>
+<p>Each catalog entry becomes an <code><a href="https://ellmer.tidyverse.org/reference/tool.html" class="external-link">ellmer::tool()</a></code>. shinygenui generates the function formals from the component’s argument names because ellmer requires the formals and declared arguments to match exactly.</p>
+<p>An app can build its catalog inside the server function. Argument types can therefore use values that are known in the current session. For example, a <code>type_enum</code> can contain the column names of the current dataset. If the model invents a column, the tool schema rejects it.</p>
+<p>shinygenui also supplies <code>update_component</code>, <code>remove_component</code>, <code>clear_canvas</code>, and <code>get_canvas_state</code>. ellmer cannot express an update schema that varies with the selected component, so <code>update_component</code> accepts <code>args</code> as a string containing a JSON object. jsonlite parses that string as data. <code><a href="reference/genui_dispatch.html">genui_dispatch()</a></code> then validates the result against the types declared by the component, including scalar types, array types, and enum values. These are the same checks used for creation, but they happen in dispatch rather than at the provider.</p>
+<p>The argument name <code>id</code> is reserved. <code>parent_id</code> is also reserved and is added automatically when a catalog contains a container.</p>
 </div>
 <div class="section level2">
 <h2 id="trace-and-replay">Trace and replay<a class="anchor" aria-label="anchor" href="#trace-and-replay"></a></h2>
-<p>Every validated call appends <code>list(op, id, component, args)</code> to an ordered trace (plain JSON-able lists, no environments). Replay is a fold: fresh registry, then dispatch + execute each entry through the exact pipeline the LLM path uses — <code>genui_replay(trace, catalog, target)</code> rebuilds the canvas with no LLM configured. Embedded input state is ephemeral by decision: never recorded, replay restores defaults. <code><a href="reference/genui_trace.html">genui_trace()</a></code> exposes the trace as a reactive read.</p>
+<p>Every successful call adds <code>list(op, id, component, args)</code> to an ordered trace. Trace entries contain only values that can be encoded as JSON. They do not contain environments or values from embedded Shiny inputs.</p>
+<p>Replay starts with a fresh registry, then passes each trace entry through the same dispatch and execution code used for model calls. <code>genui_replay(trace, catalog, target)</code> can therefore rebuild the canvas without an LLM. Because replay uses the same id assignment and ids are never reused, the rebuilt components have the same ids. Shiny inputs return to their default values.</p>
+<p><code><a href="reference/genui_trace.html">genui_trace()</a></code> provides reactive access to the trace.</p>
 </div>
 <div class="section level2">
-<h2 id="async-and-session-rules">Async and session rules<a class="anchor" aria-label="anchor" href="#async-and-session-rules"></a></h2>
-<ul><li>Tool fns fire inside promise chains where the ambient reactive domain is unreliable: every tool closes over <code>session</code> and passes it explicitly to <code>insertUI()</code>/<code>removeUI()</code>; component servers run inside <code>withReactiveDomain(session, ...)</code> so <code>moduleServer()</code> binds correctly.</li>
-<li>The streaming loop is a <code><a href="https://rdrr.io/pkg/shiny/man/ExtendedTask.html" class="external-link">shiny::ExtendedTask</a></code> (<code>stream_async</code> -&gt; promise -&gt; <code>chat_append</code>), so other sessions never block; <code><a href="https://ellmer.tidyverse.org/reference/stream_controller.html" class="external-link">ellmer::stream_controller()</a></code> backs the cancel button.</li>
+<h2 id="asynchronous-work-and-shiny-sessions">Asynchronous work and Shiny sessions<a class="anchor" aria-label="anchor" href="#asynchronous-work-and-shiny-sessions"></a></h2>
+<ul><li>Tool functions run inside promise chains, where the current reactive domain is not reliable. Each function closes over its <code>session</code> and passes it explicitly to <code>insertUI()</code> and <code>removeUI()</code>. Component servers run inside <code>withReactiveDomain(session, ...)</code> so that <code>moduleServer()</code> binds to the correct session.</li>
+<li>The streaming loop uses <code><a href="https://rdrr.io/pkg/shiny/man/ExtendedTask.html" class="external-link">shiny::ExtendedTask</a></code> with <code>stream_async()</code> and <code>chat_append()</code>, so work in one session does not block other sessions. <code><a href="https://ellmer.tidyverse.org/reference/stream_controller.html" class="external-link">ellmer::stream_controller()</a></code> supports the cancel button.</li>
 <li>
-<code>data</code> is a reactive passed to component servers; dispatch-time consumers (<code>check()</code> hooks, replay) receive its isolated current value, keeping the core pure.</li>
+<code>data</code> is a reactive passed to component servers. Code that runs during dispatch, such as <code>check()</code>, receives the current isolated value. This keeps the core independent of Shiny. Replay uses the same approach.</li>
 <li>
-<code>genui_server(id, ...)</code> is a module; the optional shinychat wiring (<code>chat_id</code>) resolves against the <em>caller’s</em> session, since the developer places <code>chat_ui()</code> alongside <code><a href="reference/genui_canvas.html">genui_canvas()</a></code> at the call site. With <code>chat_id = NULL</code> developers run their own loop; registered tools work regardless because they close over the right session.</li>
-<li>The <code>Chat</code> object must be created per session (document loudly); sharing one across sessions would cross-wire tool closures.</li>
+<code>genui_server(id, ...)</code> is a module. When <code>chat_id</code> is supplied, it refers to the session that called the module because the app places <code>chat_ui()</code> next to <code><a href="reference/genui_canvas.html">genui_canvas()</a></code>. With <code>chat_id = NULL</code>, the app developer can provide a different chat loop. The registered tools still use the correct session because they close over it.</li>
+<li>Every Shiny session must create its own ellmer <code>Chat</code>. Sharing a <code>Chat</code> between sessions would mix conversation history and tool functions from different users.</li>
 </ul></div>
 <div class="section level2">
-<h2 id="confirmed-scope-maintainer-decisions">Confirmed scope (maintainer decisions)<a class="anchor" aria-label="anchor" href="#confirmed-scope-maintainer-decisions"></a></h2>
-<ul><li>Emission is tool calls only; restricted R DSL is an M5 stretch, not v0.1.</li>
-<li>Layout is chat + canvas; inline-in-chat rendering is an M5 stretch.</li>
-<li>Embedded interactive inputs are v0.1; cross-component reactive wiring is not (registry keeps the hook described above).</li>
-<li>Embedded input state is never in the trace; replay restores defaults.</li>
-<li>Provider-agnostic via ellmer; examples default to <code>chat_anthropic()</code>.</li>
+<h2 id="confirmed-scope">Confirmed scope<a class="anchor" aria-label="anchor" href="#confirmed-scope"></a></h2>
+<ul><li>The model can only emit tool calls. A restricted R language is a possible milestone 5 feature, not part of version 0.1.</li>
+<li>Components appear on a canvas next to the chat. Placing components inside chat messages is a possible milestone 5 feature.</li>
+<li>Version 0.1 supports interactive inputs inside components. Reactivity between components is not supported, though the registry keeps the hook described above.</li>
+<li>The trace never records values from embedded inputs. Replay restores their defaults.</li>
+<li>ellmer provides support for multiple model providers. Examples use <code>chat_anthropic()</code> by default.</li>
 </ul></div>
 <div class="section level2">
 <h2 id="open-questions">Open questions<a class="anchor" aria-label="anchor" href="#open-questions"></a></h2>
-<ul><li>Should <code>update_component</code> become per-component <code>update_&lt;name&gt;</code> tools (full provider-side schema enforcement, n more tools) once catalogs grow? v0.1 ships the single built-in with server-side validation.</li>
+<ul><li>If catalogs grow, should each component get its own update tool, such as <code>update_&lt;name&gt;</code>? This would let the provider validate the full update schema but would add one tool for every component. Version 0.1 uses one <code>update_component</code> tool and validates its arguments in dispatch.</li>
 <li>
-<code><a href="https://rdrr.io/r/utils/modifyList.html" class="external-link">modifyList()</a></code> drops keys on JSON <code>null</code> — currently “reset that arg to its default”; is that the semantics we want to promise?</li>
-<li>Canvas layout: v0.1 uses a simple responsive CSS grid with an optional per-component <code>width</code> hint; real layout negotiation (model-chosen spans) may deserve a <code>layout</code> arg later.</li>
-<li>Concurrency: one in-flight stream per session is assumed; shinychat’s input gating enforces it in practice, but nothing structural prevents a developer from invoking two streams whose tool calls interleave.</li>
+<code><a href="https://rdrr.io/r/utils/modifyList.html" class="external-link">modifyList()</a></code> drops a key when its JSON value is <code>null</code>. This currently resets that argument to its default. Is that the behavior we want to promise?</li>
+<li>Version 0.1 uses a responsive CSS grid and allows each component to suggest a <code>width</code>. A later version might let the model choose column spans or use a more capable layout system.</li>
+<li>The design assumes one stream in progress for each session. shinychat prevents another input in normal use, but the package does not prevent an app developer from starting two streams whose tool calls interleave.</li>
 </ul></div>
 </div>
 

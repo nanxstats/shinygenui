@@ -1,85 +1,94 @@
 # AGENTS.md
 
-shinygenui implements declarative, catalog-constrained generative UI for
-Shiny. Read `DESIGN.md` first; it is the architecture spec of record and
-must be updated when the architecture changes.
+shinygenui lets a language model build a Shiny interface from a
+designated catalog of components. Read `DESIGN.md` first. It is the main
+architecture document and must be updated whenever the architecture
+changes.
 
 ## Workflow
 
-- Quality gate: `devtools::document()` + `devtools::check()` must pass
-  with **0 errors, 0 warnings, 0 notes** before any milestone or PR is
-  called done. R is available locally; run the checks, don’t assume.
-- Vendored, read-only dependency sources live in `deps-src/` (regenerate
-  with `okr sync`; see `deps-src/_manifest.md` for versions). When
-  unsure about an ellmer/shinychat/shiny API or internal behavior, read
-  the vendored source instead of guessing — pin behavior to what the
-  vendored version actually does.
+- Before calling a milestone or PR complete, run `devtools::document()`
+  and `devtools::check()`. The result must have **0 errors, 0 warnings,
+  0 notes**. R is available locally, so do not assume that the checks
+  pass.
+- Dependency sources in `deps-src/` are provided for reference and must
+  not be edited. Regenerate them with `okr sync`; see
+  `deps-src/_manifest.md` for versions. If you are unsure how ellmer,
+  shinychat, or Shiny behaves, read the version in `deps-src/` instead
+  of guessing.
 - testthat suites under `tests/testthat/` must never touch the network,
-  an LLM, or a real browser. Shiny-side behavior is tested with
+  an LLM, or a real browser. Test Shiny behavior with
   [`shiny::testServer`](https://rdrr.io/pkg/shiny/man/testServer.html)
-  and hand-built
+  and
   [`genui_call()`](https://nanx.me/shinygenui/reference/genui_call.md)
-  objects.
-- Live LLM acceptance tests live in `tests/manual/` (never auto-run; see
-  its README). `.env` at the package root holds `OPENAI_API_KEY` — it is
-  gitignored and Rbuildignored; load with `readRenviron(".env")`, and
-  never commit or print it. The designated live model is `gpt-5.6-sol`
-  with `ellmer::params(reasoning_effort = "medium")`.
+  objects created by hand.
+- Live LLM acceptance tests live in `tests/manual/`. Never run them
+  automatically; see the README in that directory. The `.env` file at
+  the package root contains `OPENAI_API_KEY`. Git and R builds ignore
+  this file. Load it with `readRenviron(".env")`, and never commit or
+  print it. The designated live model is `gpt-5.6-sol` with
+  `ellmer::params(reasoning_effort = "medium")`.
 
 ## Architecture invariants (do not break)
 
-- The model never emits code and the package never calls
-  [`eval()`](https://rdrr.io/r/base/eval.html)/[`parse()`](https://rdrr.io/r/base/parse.html)
-  on model output. Tool arguments are plain data validated by
+- The model never emits code, and the package never calls
+  [`eval()`](https://rdrr.io/r/base/eval.html) or
+  [`parse()`](https://rdrr.io/r/base/parse.html) on model output. Tool
+  arguments are plain data. The pure
   [`genui_dispatch()`](https://nanx.me/shinygenui/reference/genui_dispatch.md)
-  (pure, no Shiny/LLM) before anything renders.
-- Every `insertUI()`/`removeUI()` passes `session =` explicitly, and
-  component servers run under `shiny::withReactiveDomain(session, ...)`:
-  tool calls fire inside ellmer’s async promise chains where the ambient
-  reactive domain is unreliable.
+  function validates them before anything is rendered and does not
+  depend on Shiny or an LLM.
+- Every call to `insertUI()` or `removeUI()` supplies `session =`
+  explicitly. Component servers run under
+  `shiny::withReactiveDomain(session, ...)`. Tools run inside ellmer’s
+  asynchronous promise chains, where the current reactive domain is not
+  reliable.
 - Instance ids (`c1`, `c2`, …) are assigned deterministically and never
-  reused. Trace entries are plain JSON-able lists; embedded input state
-  is intentionally never recorded (replay restores defaults).
-- `update_component` re-instantiates the module inside the instance’s
-  stable shell (same position, same ids); observer handles live in the
-  registry and are destroyed on update/remove. Output render functions
-  can’t be unregistered — replaced on update, left suspended on remove.
-- Errors during tool handling must propagate as conditions (never crash
-  the session): ellmer converts them to tool errors via
-  [`conditionMessage()`](https://rdrr.io/r/base/conditions.html), which
-  is therefore model-facing text — make it actionable (name the bad
-  value, list the valid ones).
+  reused. Trace entries are plain lists that can be encoded as JSON.
+  Values from Shiny inputs are deliberately not recorded, so replay
+  restores their defaults.
+- `update_component` creates the module again inside the same shell,
+  which preserves its position and ids. The registry stores observer
+  handles and destroys them when a component is updated or removed.
+  Shiny output render functions cannot be unregistered. An update
+  replaces them, while a removal leaves them suspended.
+- Errors while handling tools must propagate as R conditions and must
+  never crash the session. ellmer turns each condition into a tool error
+  using [`conditionMessage()`](https://rdrr.io/r/base/conditions.html),
+  so the message is shown to the model. Make it useful: name the invalid
+  value and list the valid choices.
 - One ellmer `Chat` per Shiny session. Component `description`s and
-  `inst/prompts/system.md` are product surface; edit them with care.
+  `inst/prompts/system.md` are part of the product. Edit them with care.
 
 ## Gotchas learned in this codebase
 
-- cli: a message interpolating two vectors makes `{?s}` fail with
-  “Multiple quantities for pluralization” — prefix with
-  `{cli::qty(length(x))}`. Wrappers around `cli_abort()` must thread
-  `.envir = parent.frame()` (and a `call` argument) or interpolation
+- In cli, a message that interpolates two vectors makes `{?s}` fail with
+  “Multiple quantities for pluralization”. Prefix the message with
+  `{cli::qty(length(x))}`. Wrappers around `cli_abort()` must pass
+  `.envir = parent.frame()` and a `call` argument, or interpolation
   happens in the wrong frame.
-- Never let model-supplied text reach the cli/glue interpolator (it may
-  contain braces or JSON):
-  [`sprintf()`](https://rdrr.io/r/base/sprintf.html) it first, then
+- Never let text supplied by the model reach the cli or glue
+  interpolator. It may contain braces or JSON. Format it with
+  [`sprintf()`](https://rdrr.io/r/base/sprintf.html) first, then
   interpolate the result as a single value.
 - [`R6::R6Class`](https://r6.r-lib.org/reference/R6Class.html) requires
-  unique names across `public` + `private` + `active` combined.
+  names to be unique across `public`, `private`, and `active`.
 - whisker treats `""` as truthy; pass `NULL` to suppress a template
   section.
 - ellmer types are S7: class vectors look like
-  `c("ellmer::TypeEnum", "ellmer::Type", "S7_object")`; read properties
-  with `attr(x, "values", exact = TRUE)` etc.
+  `c("ellmer::TypeEnum", "ellmer::Type", "S7_object")`. Read properties
+  with `attr(x, "values", exact = TRUE)` and related calls.
   [`ellmer::tool()`](https://ellmer.tidyverse.org/reference/tool.html)
   requires the function’s formals to exactly match the declared
-  `arguments` (generate formals with
-  [`rlang::new_function()`](https://rlang.r-lib.org/reference/new_function.html) +
-  [`rlang::pairlist2()`](https://rlang.r-lib.org/reference/pairlist2.html)).
+  `arguments`. Generate formals with
+  [`rlang::new_function()`](https://rlang.r-lib.org/reference/new_function.html)
+  and
+  [`rlang::pairlist2()`](https://rlang.r-lib.org/reference/pairlist2.html).
 - `chat_openai(api_key = )` is deprecated; use
   `credentials = function() list(api_key = ...)` in tests.
 - [`shiny::MockShinySession`](https://rdrr.io/pkg/shiny/man/MockShinySession.html)
-  implements `sendInsertUI`/`sendRemoveUI` as *warning* no-ops: full
-  engine paths run fine under `testServer` — wrap calls in
+  implements `sendInsertUI`/`sendRemoveUI` as functions that warn and do
+  nothing. Full engine paths still run under `testServer`; wrap calls in
   [`suppressWarnings()`](https://rdrr.io/r/base/warning.html).
 - shinychat DOM (0.4.x): messages render in `div.shiny-chat-messages`
   inside `<shiny-chat-container id="...">` (class selector, not
@@ -87,6 +96,6 @@ must be updated when the architecture changes.
   `input$<id>_cancel`.
 - Progressive rendering timing: components land on the canvas while the
   model is still streaming narration. Any assertion that chat is “quiet”
-  must first wait for the in-flight stream to finish.
+  must first wait for the stream in progress to finish.
 - shinytest2 refuses to run without `NOT_CRAN=true` (scripts may
   `Sys.setenv` it themselves).

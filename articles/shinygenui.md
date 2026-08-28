@@ -1,21 +1,18 @@
-# shinygenui
+# Get started with shinygenui
 
-``` r
+shinygenui adds two things to a Shiny app: a chat panel where people can
+ask questions and a canvas where a large language model can add UI
+components. The app developer decides which UI components the model may
+use and which arguments each one accepts. Together, these components
+form a catalog.
 
-library(shinygenui)
-```
-
-shinygenui adds a generative UI surface to a Shiny app: a chat panel
-where end users ask questions, and a canvas where a large language model
-answers by composing UI components. The crucial constraint is that the
-model can only render what you allow. You define a finite catalog of
-typed components; each one compiles to an
-[ellmer](https://ellmer.tidyverse.org) tool, and the model “renders” by
-calling those tools with plain data arguments. It never writes R code,
-and the package never evaluates model output. If the model supplies a
-bad argument — a column that does not exist, a value outside an enum —
-the call fails validation and the error message goes back to the model
-to correct, while your session keeps running.
+Each component in the catalog becomes an
+[ellmer](https://ellmer.tidyverse.org) tool. The model builds the
+interface by calling these tools with data. It never writes R code, and
+shinygenui never evaluates model output. If the model supplies an
+invalid argument, such as a column that does not exist, validation
+rejects the call. The model receives a useful error and can try again
+while the Shiny session keeps running.
 
 ## A complete app
 
@@ -23,6 +20,7 @@ to correct, while your session keeps running.
 
 library(shiny)
 library(bslib)
+library(shinygenui)
 
 ui <- page_sidebar(
   title = "mtcars explorer",
@@ -42,7 +40,7 @@ server <- function(input, output, session) {
     greeting = "Ask me about the mtcars data.",
     system_prompt = genui_prompt(
       catalog,
-      context = "The data is R's built-in mtcars dataset."
+      context = "The data is the mtcars dataset included with R."
     )
   )
 }
@@ -50,38 +48,40 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-Three pieces do all the work:
+The app has three main pieces:
 
-- `genui_canvas("canvas")` is the container components land in.
+- [`genui_canvas()`](https://nanx.me/shinygenui/reference/genui_canvas.md)
+  creates the space where components appear.
 - [`genui_catalog()`](https://nanx.me/shinygenui/reference/genui_catalog.md)
-  collects the components the model may use — here the bslib starter
-  pack: a value box, a markdown card, a data table, a scatter plot, and
-  a histogram.
+  collects the components the model may use. This example uses the
+  components supplied by shinygenui: a value box, a Markdown card, a
+  data table, a scatter plot, and a histogram.
 - [`genui_server()`](https://nanx.me/shinygenui/reference/genui_server.md)
-  compiles the catalog into tools, registers them (plus the built-in
-  lifecycle tools) on the ellmer `Chat`, installs the system prompt, and
-  runs the chat loop against the
+  turns the catalog into tools and adds them to the ellmer `Chat`. It
+  also adds tools for changing the canvas, installs the system prompt,
+  and connects the model to the
   [`shinychat::chat_ui()`](https://posit-dev.github.io/shinychat/r/reference/chat_ui.html)
-  you placed in the sidebar.
+  in the sidebar.
 
-Any ellmer provider works: swap
+Any ellmer provider works here: you can swap
 [`ellmer::chat_anthropic()`](https://ellmer.tidyverse.org/reference/chat_anthropic.html)
 for
 [`ellmer::chat_openai()`](https://ellmer.tidyverse.org/reference/chat_openai.html),
 [`ellmer::chat_ollama()`](https://ellmer.tidyverse.org/reference/chat_ollama.html),
-and so on. Create the `Chat` inside the server function — one per
-session — so tool closures and conversation history are never shared
-between users.
+and so on. Create the `Chat` inside the server function so that each
+session gets its own object. This keeps the conversation and the
+functions used by its tools separate for each user.
 
 ## Defining a component
 
-A component couples the model-facing schema with your rendering code:
+A component describes what the model can ask for and how Shiny should
+display the result:
 
 ``` r
 
 histogram <- genui_component(
   name = "histogram",
-  description = "A histogram of one numeric column with a bin-count slider.",
+  description = "A numeric histogram with a slider for the number of bins.",
   args = list(
     column = ellmer::type_enum(names(mtcars), "Column to plot."),
     bins = ellmer::type_integer("Initial number of bins.", required = FALSE)
@@ -108,86 +108,85 @@ histogram <- genui_component(
 )
 ```
 
-- `name` and `description` are product surface: they are exactly what
-  the model reads when deciding which tool to call. Write them like
-  documentation.
+- `name` and `description` tell the model when to use the component.
+  Write descriptions that are clear and specific.
 - `args` is a named list of ellmer types. A plain string is shorthand
   for
   [`ellmer::type_string()`](https://ellmer.tidyverse.org/reference/type_boolean.html).
-  Because catalogs are ordinary R values, you can build them *inside*
-  the server function and ground enums on live facts: above, `column`
-  enumerates the actual column names, so a hallucinated column is
-  rejected by schema before your code ever runs.
-- `ui(id, args)` returns htmltools tags. `id` is the instance’s module
-  id; namespace embedded inputs and outputs with `shiny::NS(id)`.
-- `server(id, args, data)` is optional and wraps
-  [`shiny::moduleServer()`](https://rdrr.io/pkg/shiny/man/moduleServer.html).
-  `data` is the reactive you passed to
+  You can build the catalog inside the server function, which means its
+  choices can depend on values available in the current session. In this
+  example, `column` only accepts names that occur in `mtcars`.
+  Validation rejects any other name before your code runs.
+- `ui(id, args)` returns htmltools tags. `id` is the module id for this
+  instance. Use `shiny::NS(id)` for inputs and outputs inside the
+  component.
+- `server(id, args, data)` is optional. It usually calls
+  [`shiny::moduleServer()`](https://rdrr.io/pkg/shiny/man/moduleServer.html),
+  as in the example. `data` is the reactive passed to
   [`genui_server()`](https://nanx.me/shinygenui/reference/genui_server.md).
-  Embedded inputs like the slider here are real Shiny inputs wired to
-  this instance’s own module: dragging the slider re-renders at Shiny
-  speed with zero LLM traffic. If your module creates observers, return
-  them (alone or in a list) so they can be destroyed when the instance
-  is updated or removed.
-- `check(args, data)` runs after schema validation with the current data
-  value. Return `NULL` to accept or a string to reject; the string
-  becomes the tool error the model reads.
+  The slider is a regular Shiny input, so moving it redraws the plot
+  without contacting the model. If the module creates observers, return
+  them on their own or in a list. shinygenui will destroy them when it
+  updates or removes the component.
+- `check(args, data)` runs after argument validation and receives the
+  current value of `data`. Return `NULL` to accept the arguments or a
+  string to reject them. The model receives this string as an error.
 
 ## The component lifecycle
 
-Every created instance gets a stable id (`c1`, `c2`, …) that is returned
-to the model in the tool result. Alongside your catalog, four built-in
-tools are always registered:
+Each component created by the model gets an id such as `c1` or `c2`. The
+model receives this id, which lets it refer to the same component later.
+shinygenui also gives the model four tools for working with the canvas:
 
-- `update_component(id, args)` merges partial arguments over the current
-  ones, re-validates, and re-instantiates the module inside the
-  instance’s stable shell — same canvas position, no flicker. Because
-  the module restarts, embedded input state resets to defaults on
-  update; snapshot and restore across updates is future work.
-- `remove_component(id)` destroys the instance (and, for containers, its
-  children).
+- `update_component(id, args)` changes only the arguments supplied by
+  the model, validates the result, and starts the module again in the
+  same place. Because the module restarts, its inputs return to their
+  default values.
+- `remove_component(id)` removes the component. If it is a container,
+  this also removes its children.
 - `clear_canvas()` empties the canvas.
-- `get_canvas_state()` is read-only: it reports every instance with its
-  arguments and the live values of its embedded inputs, so the model can
-  see what the user has adjusted before acting.
+- `get_canvas_state()` reports each component, its arguments, and the
+  current values of its Shiny inputs. It does not change the canvas. The
+  model can use this information to see what a user has adjusted.
 
-The packaged system prompt (see
-[`genui_prompt()`](https://nanx.me/shinygenui/reference/genui_prompt.md))
-instructs the model to narrate briefly in chat while placing visuals via
-tools, to reuse `update_component` when the user refines an existing
-view, and to prefer few, dense components. Add app-specific grounding
-through the `context` argument — a schema description, a few sample
-rows, a business glossary. Raw data is never put in the prompt unless
-you put it there.
+The system prompt created by
+[`genui_prompt()`](https://nanx.me/shinygenui/reference/genui_prompt.md)
+asks the model to keep its chat response brief while it adds components.
+It also asks the model to update an existing component when the user
+refines a request and to avoid filling the canvas with unnecessary
+components. Use the `context` argument to explain your app and its data.
+Useful context might include a description of the columns, a few sample
+rows, or terms that are specific to your organization. shinygenui only
+puts raw data in the prompt if you include it yourself.
 
 ## Containers
 
-A component declared with `container = TRUE` renders a slot other
-components can target: the model creates the container first, then
-passes its instance id as `parent_id` when creating children.
+A component declared with `container = TRUE` can hold other components.
+The model creates the container first, then passes its id as `parent_id`
+when it creates each child.
 [`genui_card_row()`](https://nanx.me/shinygenui/reference/genui_card_row.md)
-is the packaged example — a titled row that groups value boxes or plots.
-Removing a container removes its children. See
-`inst/examples/02-layout/app.R` for a full app.
+is an example supplied by the package. It creates a titled row that can
+group value boxes or plots. Removing a container also removes its
+children. See `inst/examples/02-layout/app.R` for a full app.
 
 ## Trace and replay
 
-Every validated call appends to an ordered trace of plain, serializable
-lists: the spec of record for the canvas.
+shinygenui records each successful call as a plain list. Together, these
+lists describe the current canvas in the order it was built.
 [`genui_trace()`](https://nanx.me/shinygenui/reference/genui_trace.md)
-gives you a reactive read of it, and
+returns this record as a reactive, and
 [`genui_replay()`](https://nanx.me/shinygenui/reference/genui_replay.md)
-folds a saved trace through the same validate-and-execute pipeline to
-rebuild the canvas — in a fresh session, with no LLM configured:
+passes a saved record through the same validation and rendering code to
+rebuild the canvas. You can replay it in a new session without an LLM:
 
 ``` r
 
-# in the session that built the canvas
+# In the session that built the canvas
 observe({
   saveRDS(genui_trace(session)(), "canvas-trace.rds")
 })
 
-# in a later session, no chat anywhere
+# In a later session, no chat anywhere
 server <- function(input, output, session) {
   genui_replay(
     readRDS("canvas-trace.rds"),
@@ -198,17 +197,17 @@ server <- function(input, output, session) {
 }
 ```
 
-Instance ids come back identical (id assignment is deterministic and ids
-are never reused). Embedded input values are intentionally *not*
-recorded: replay restores components with inputs at their defaults.
+The same calls produce the same instance ids, and ids are never reused.
+The record does not include values from Shiny inputs, so replay restores
+those inputs to their defaults.
 
 ## When things go wrong
 
-Every failure while handling a tool call — schema validation, `check()`
-hooks, rendering errors — becomes a tool error the model reads and
-recovers from. Failed creates roll back completely; failed updates leave
-the existing instance untouched. The Shiny session itself never crashes,
-and the worst case of a prompt injection is an ugly dashboard, not code
-execution. Failures are always written to the server log; set
-`options(shinygenui.verbose = TRUE)` to also log successful canvas
-operations.
+If argument validation, `check()`, or rendering fails, the model
+receives an error and can try again. A failed create leaves nothing
+behind, and a failed update leaves the existing component unchanged. The
+error does not crash the Shiny session. Because the model can only call
+components in your catalog, a prompt injection cannot make it run
+arbitrary code. Failures are always written to the server log. Set
+`options(shinygenui.verbose = TRUE)` to also log successful changes to
+the canvas.
