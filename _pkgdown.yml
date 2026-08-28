@@ -5,3 +5,36 @@ template:
   bslib:
     preset: "bootstrap"
   math-rendering: "mathjax"
+
+reference:
+
+- title: Components and catalogs
+  desc: Define the finite set of typed components the model can render.
+  contents:
+  - genui_component
+  - genui_catalog
+
+- title: Built-in components
+  desc: Add ready-made components and layouts to a catalog.
+  contents:
+  - genui_components_bslib
+  - genui_card_row
+
+- title: Shiny integration
+  desc: Create a generative UI canvas and connect it to an ellmer chat.
+  contents:
+  - genui_canvas
+  - genui_server
+  - genui_prompt
+
+- title: Trace and replay
+  desc: Capture and restore the validated operations that produced a canvas.
+  contents:
+  - genui_trace
+  - genui_replay
+
+- title: Dispatch
+  desc: Construct, validate, and plan model-issued tool calls without Shiny or an LLM.
+  contents:
+  - genui_call
+  - genui_dispatch
