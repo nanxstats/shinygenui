@@ -26,3 +26,24 @@ JSON-friendly lists. \code{\link[=genui_replay]{genui_replay()}} can rebuild the
 no LLM configured. Embedded input state is intentionally ephemeral and
 never recorded.
 }
+\examples{
+note <- genui_component(
+  name = "note_card",
+  description = "A card showing a short note.",
+  args = list(text = "The note text."),
+  ui = function(id, args) htmltools::p(args$text)
+)
+catalog <- genui_catalog(note)
+chat <- ellmer::chat_openai(
+  model = "gpt-5.6-sol",
+  credentials = function() list(api_key = "not-used")
+)
+shiny::testServer(
+  genui_server,
+  args = list(id = "canvas", catalog = catalog, chat = chat),
+  {
+    trace <- genui_trace(session)
+    stopifnot(identical(trace(), list()))
+  }
+)
+}

@@ -47,3 +47,26 @@ Entries that no longer validate (for example after the catalog changed)
 are skipped with a warning; the rest of the trace still replays. The
 target canvas is emptied first, so replaying twice is idempotent.
 }
+\examples{
+note <- genui_component(
+  name = "note_card",
+  description = "A card showing a short note.",
+  args = list(text = "The note text."),
+  ui = function(id, args) htmltools::p(args$text)
+)
+catalog <- genui_catalog(note)
+saved_trace <- list(list(
+  op = "create",
+  id = "c1",
+  component = "note_card",
+  args = list(text = "Hello")
+))
+shiny::testServer(
+  function(input, output, session) {
+    suppressWarnings(genui_replay(saved_trace, catalog, target = "canvas"))
+  },
+  {
+    stopifnot(identical(names(session$returned$instances()), "c1"))
+  }
+)
+}
