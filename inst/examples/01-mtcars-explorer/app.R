@@ -6,9 +6,7 @@
 # grounded on mtcars, so hallucinated columns come back as tool errors the
 # model corrects itself.
 #
-# Requires an Anthropic API key in ANTHROPIC_API_KEY. Any ellmer provider
-# works: swap ellmer::chat_anthropic() for ellmer::chat_openai(),
-# ellmer::chat_ollama(), etc.
+# Requires an OpenAI API key in OPENAI_API_KEY. Any ellmer provider works.
 #
 # Try, in order:
 #   1. "Show mpg vs. hp, and a value box with the average mpg."
@@ -45,7 +43,7 @@ server <- function(input, output, session) {
   catalog <- genui_catalog(genui_components_bslib(data = mtcars))
 
   # One Chat per session: create it here, never at the top level.
-  chat <- ellmer::chat_anthropic()
+  chat <- ellmer::chat_openai()
 
   genui_server(
     "canvas",
