@@ -83,23 +83,36 @@
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
 <p>Here is a complete app with a chat sidebar, a canvas, and a catalog based on <code>mtcars</code>. Start by asking for a plot of <code>mpg</code> against <code>hp</code> and a value box with the average <code>mpg</code>. Then ask the model to color the points by cylinder count. It updates the existing plot in place.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.posit.co/" class="external-link">shiny</a></span><span class="op">)</span></span>
+<p>Create a gitignored <code>.env</code> file alongside the app and set all three values explicitly:</p>
+<pre class="dotenv"><code>OPENAI_API_KEY=&lt;your-api-key&gt;
+SHINYGENUI_MODEL=&lt;model-id&gt;
+SHINYGENUI_EFFORT=&lt;reasoning-effort&gt;</code></pre>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/readRenviron.html" class="external-link">readRenviron</a></span><span class="op">(</span><span class="st">".env"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.posit.co/" class="external-link">shiny</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/bslib/" class="external-link">bslib</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://nanx.me/shinygenui/">shinygenui</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rstudio.github.io/bslib/reference/page_sidebar.html" class="external-link">page_sidebar</a></span><span class="op">(</span></span>
+<span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/bslib/man/page_sidebar.html" class="external-link">page_sidebar</a></span><span class="op">(</span></span>
 <span>  title <span class="op">=</span> <span class="st">"mtcars explorer"</span>,</span>
-<span>  sidebar <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/bslib/reference/sidebar.html" class="external-link">sidebar</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">380</span>, <span class="fu">shinychat</span><span class="fu">::</span><span class="fu"><a href="https://posit-dev.github.io/shinychat/r/reference/chat_ui.html" class="external-link">chat_ui</a></span><span class="op">(</span><span class="st">"chat"</span>, height <span class="op">=</span> <span class="st">"100%"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  sidebar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/bslib/man/sidebar.html" class="external-link">sidebar</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">380</span>, <span class="fu">shinychat</span><span class="fu">::</span><span class="fu"><a href="https://posit-dev.github.io/shinychat/r/reference/chat_ui.html" class="external-link">chat_ui</a></span><span class="op">(</span><span class="st">"chat"</span>, height <span class="op">=</span> <span class="st">"100%"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="reference/genui_canvas.html">genui_canvas</a></span><span class="op">(</span><span class="st">"canvas"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">catalog</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/genui_catalog.html">genui_catalog</a></span><span class="op">(</span><span class="fu"><a href="reference/genui_components_bslib.html">genui_components_bslib</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mtcars</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">chat</span> <span class="op">&lt;-</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_openai.html" class="external-link">chat_openai</a></span><span class="op">(</span></span>
+<span>    model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"SHINYGENUI_MODEL"</span><span class="op">)</span>,</span>
+<span>    params <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/params.html" class="external-link">params</a></span><span class="op">(</span></span>
+<span>      reasoning_effort <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"SHINYGENUI_EFFORT"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    echo <span class="op">=</span> <span class="st">"none"</span></span>
+<span>  <span class="op">)</span></span>
 <span>  <span class="fu"><a href="reference/genui_server.html">genui_server</a></span><span class="op">(</span></span>
 <span>    <span class="st">"canvas"</span>,</span>
 <span>    catalog <span class="op">=</span> <span class="va">catalog</span>,</span>
-<span>    chat <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_openai.html" class="external-link">chat_openai</a></span><span class="op">(</span><span class="op">)</span>, <span class="co"># Any ellmer provider works</span></span>
+<span>    chat <span class="op">=</span> <span class="va">chat</span>, <span class="co"># Any ellmer provider works</span></span>
 <span>    data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span>,</span>
 <span>    chat_id <span class="op">=</span> <span class="st">"chat"</span>,</span>
 <span>    system_prompt <span class="op">=</span> <span class="fu"><a href="reference/genui_prompt.html">genui_prompt</a></span><span class="op">(</span><span class="va">catalog</span>, context <span class="op">=</span> <span class="st">"The data is mtcars."</span><span class="op">)</span></span>
@@ -109,7 +122,7 @@
 <span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></code></pre></div>
 <p>The included components have the same interactive behavior as any other Shiny UI. For example, the histogram has a slider for the number of bins. Moving the slider redraws the plot immediately without another request to the model.</p>
 <p>You can define your own component with <code><a href="reference/genui_component.html">genui_component()</a></code>:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/genui_component.html">genui_component</a></span><span class="op">(</span></span>
 <span>  name <span class="op">=</span> <span class="st">"value_box"</span>,</span>
 <span>  description <span class="op">=</span> <span class="st">"A box highlighting one summary statistic."</span>,</span>
@@ -125,8 +138,9 @@
 <span>  <span class="op">}</span> <span class="co"># Optional Shiny module</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The <code>inst/examples/</code> directory contains two runnable apps:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/runApp.html" class="external-link">runApp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples/01-mtcars-explorer/"</span>, package <span class="op">=</span> <span class="st">"shinygenui"</span><span class="op">)</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/readRenviron.html" class="external-link">readRenviron</a></span><span class="op">(</span><span class="st">".env"</span><span class="op">)</span></span>
+<span><span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/runApp.html" class="external-link">runApp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples/01-mtcars-explorer/"</span>, package <span class="op">=</span> <span class="st">"shinygenui"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/runApp.html" class="external-link">runApp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples/02-layout/"</span>, package <span class="op">=</span> <span class="st">"shinygenui"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><code>01-mtcars-explorer</code> introduces the basics. <code>02-layout</code> shows how to group components in rows and rebuild a canvas from its saved history with <code><a href="reference/genui_replay.html">genui_replay()</a></code>.</p>
 </div>

@@ -24,10 +24,10 @@ changes.
   objects created by hand.
 - Live LLM acceptance tests live in `tests/manual/`. Never run them
   automatically; see the README in that directory. The `.env` file at
-  the package root contains `OPENAI_API_KEY`. Git and R builds ignore
-  this file. Load it with `readRenviron(".env")`, and never commit or
-  print it. The designated live model is `gpt-5.6-sol` with
-  `ellmer::params(reasoning_effort = "medium")`.
+  the package root contains `OPENAI_API_KEY`, `SHINYGENUI_MODEL`, and
+  `SHINYGENUI_EFFORT`. Git and R builds ignore this file. Load it with
+  `readRenviron(".env")`, never commit or print it, and do not add model
+  or reasoning effort fallbacks to the live tests.
 
 ## Architecture invariants (do not break)
 
@@ -81,9 +81,9 @@ changes.
   [`ellmer::tool()`](https://ellmer.tidyverse.org/reference/tool.html)
   requires the function’s formals to exactly match the declared
   `arguments`. Generate formals with
-  [`rlang::new_function()`](https://rlang.r-lib.org/reference/new_function.html)
+  [`rlang::new_function()`](https://rdrr.io/pkg/rlang/man/new_function.html)
   and
-  [`rlang::pairlist2()`](https://rlang.r-lib.org/reference/pairlist2.html).
+  [`rlang::pairlist2()`](https://rdrr.io/pkg/rlang/man/pairlist2.html).
 - `chat_openai(api_key = )` is deprecated; use
   `credentials = function() list(api_key = ...)` in tests.
 - [`shiny::MockShinySession`](https://rdrr.io/pkg/shiny/man/MockShinySession.html)

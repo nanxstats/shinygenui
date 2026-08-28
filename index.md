@@ -46,7 +46,18 @@ based on `mtcars`. Start by asking for a plot of `mpg` against `hp` and
 a value box with the average `mpg`. Then ask the model to color the
 points by cylinder count. It updates the existing plot in place.
 
+Create a gitignored `.env` file alongside the app and set all three
+values explicitly:
+
+``` dotenv
+OPENAI_API_KEY=<your-api-key>
+SHINYGENUI_MODEL=<model-id>
+SHINYGENUI_EFFORT=<reasoning-effort>
+```
+
 ``` r
+
+readRenviron(".env")
 
 library(shiny)
 library(bslib)
@@ -60,10 +71,17 @@ ui <- page_sidebar(
 
 server <- function(input, output, session) {
   catalog <- genui_catalog(genui_components_bslib(data = mtcars))
+  chat <- ellmer::chat_openai(
+    model = Sys.getenv("SHINYGENUI_MODEL"),
+    params = ellmer::params(
+      reasoning_effort = Sys.getenv("SHINYGENUI_EFFORT")
+    ),
+    echo = "none"
+  )
   genui_server(
     "canvas",
     catalog = catalog,
-    chat = ellmer::chat_openai(), # Any ellmer provider works
+    chat = chat, # Any ellmer provider works
     data = reactive(mtcars),
     chat_id = "chat",
     system_prompt = genui_prompt(catalog, context = "The data is mtcars.")
@@ -103,6 +121,7 @@ The `inst/examples/` directory contains two runnable apps:
 
 ``` r
 
+readRenviron(".env")
 shiny::runApp(system.file("examples/01-mtcars-explorer/", package = "shinygenui"))
 shiny::runApp(system.file("examples/02-layout/", package = "shinygenui"))
 ```

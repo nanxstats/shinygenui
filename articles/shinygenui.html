@@ -80,24 +80,36 @@ while the Shiny session keeps running.</p>
 <div class="section level2">
 <h2 id="a-complete-app">A complete app<a class="anchor" aria-label="anchor" href="#a-complete-app"></a>
 </h2>
+<p>Create a gitignored <code>.env</code> file alongside the app. Set
+<code>OPENAI_API_KEY</code>, <code>SHINYGENUI_MODEL</code>, and
+<code>SHINYGENUI_EFFORT</code> explicitly.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.posit.co/" class="external-link">shiny</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/readRenviron.html" class="external-link">readRenviron</a></span><span class="op">(</span><span class="st">".env"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.posit.co/" class="external-link">shiny</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/bslib/" class="external-link">bslib</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://nanx.me/shinygenui/">shinygenui</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rstudio.github.io/bslib/reference/page_sidebar.html" class="external-link">page_sidebar</a></span><span class="op">(</span></span>
+<span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/bslib/man/page_sidebar.html" class="external-link">page_sidebar</a></span><span class="op">(</span></span>
 <span>  title <span class="op">=</span> <span class="st">"mtcars explorer"</span>,</span>
-<span>  sidebar <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/bslib/reference/sidebar.html" class="external-link">sidebar</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">380</span>, <span class="fu">shinychat</span><span class="fu">::</span><span class="fu"><a href="https://posit-dev.github.io/shinychat/r/reference/chat_ui.html" class="external-link">chat_ui</a></span><span class="op">(</span><span class="st">"chat"</span>, height <span class="op">=</span> <span class="st">"100%"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  sidebar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/bslib/man/sidebar.html" class="external-link">sidebar</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">380</span>, <span class="fu">shinychat</span><span class="fu">::</span><span class="fu"><a href="https://posit-dev.github.io/shinychat/r/reference/chat_ui.html" class="external-link">chat_ui</a></span><span class="op">(</span><span class="st">"chat"</span>, height <span class="op">=</span> <span class="st">"100%"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="../reference/genui_canvas.html">genui_canvas</a></span><span class="op">(</span><span class="st">"canvas"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">catalog</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/genui_catalog.html">genui_catalog</a></span><span class="op">(</span><span class="fu"><a href="../reference/genui_components_bslib.html">genui_components_bslib</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">mtcars</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">chat</span> <span class="op">&lt;-</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_openai.html" class="external-link">chat_openai</a></span><span class="op">(</span></span>
+<span>    model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"SHINYGENUI_MODEL"</span><span class="op">)</span>,</span>
+<span>    params <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/params.html" class="external-link">params</a></span><span class="op">(</span></span>
+<span>      reasoning_effort <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"SHINYGENUI_EFFORT"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    echo <span class="op">=</span> <span class="st">"none"</span></span>
+<span>  <span class="op">)</span></span>
 <span></span>
 <span>  <span class="fu"><a href="../reference/genui_server.html">genui_server</a></span><span class="op">(</span></span>
 <span>    <span class="st">"canvas"</span>,</span>
 <span>    catalog <span class="op">=</span> <span class="va">catalog</span>,</span>
-<span>    chat <span class="op">=</span> <span class="fu">ellmer</span><span class="fu">::</span><span class="fu"><a href="https://ellmer.tidyverse.org/reference/chat_openai.html" class="external-link">chat_openai</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    chat <span class="op">=</span> <span class="va">chat</span>,</span>
 <span>    data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">)</span>,</span>
 <span>    chat_id <span class="op">=</span> <span class="st">"chat"</span>,</span>
 <span>    greeting <span class="op">=</span> <span class="st">"Ask me about the mtcars data."</span>,</span>
@@ -146,7 +158,7 @@ display the result:</p>
 <span>  <span class="op">)</span>,</span>
 <span>  ui <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">id</span>, <span class="va">args</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">ns</span> <span class="op">&lt;-</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/NS.html" class="external-link">NS</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span>
-<span>    <span class="fu">bslib</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/bslib/reference/card.html" class="external-link">card</a></span><span class="op">(</span></span>
+<span>    <span class="fu">bslib</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bslib/man/card.html" class="external-link">card</a></span><span class="op">(</span></span>
 <span>      <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/plotOutput.html" class="external-link">plotOutput</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"plot"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>      <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/sliderInput.html" class="external-link">sliderInput</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"bins"</span><span class="op">)</span>, <span class="st">"Bins"</span>, <span class="fl">5</span>, <span class="fl">60</span>, <span class="va">args</span><span class="op">$</span><span class="va">bins</span> <span class="op"><a href="https://rdrr.io/r/base/Control.html" class="external-link">%||%</a></span> <span class="fl">30</span><span class="op">)</span></span>
 <span>    <span class="op">)</span></span>
