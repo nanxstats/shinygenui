@@ -29,7 +29,12 @@ while the Shiny session keeps running.
 
 ## A complete app
 
+Create a gitignored `.env` file alongside the app. Set `OPENAI_API_KEY`,
+`SHINYGENUI_MODEL`, and `SHINYGENUI_EFFORT` explicitly.
+
 ```{r}
+readRenviron(".env")
+
 library(shiny)
 library(bslib)
 library(shinygenui)
@@ -42,11 +47,18 @@ ui <- page_sidebar(
 
 server <- function(input, output, session) {
   catalog <- genui_catalog(genui_components_bslib(data = mtcars))
+  chat <- ellmer::chat_openai(
+    model = Sys.getenv("SHINYGENUI_MODEL"),
+    params = ellmer::params(
+      reasoning_effort = Sys.getenv("SHINYGENUI_EFFORT")
+    ),
+    echo = "none"
+  )
 
   genui_server(
     "canvas",
     catalog = catalog,
-    chat = ellmer::chat_openai(),
+    chat = chat,
     data = reactive(mtcars),
     chat_id = "chat",
     greeting = "Ask me about the mtcars data.",

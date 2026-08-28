@@ -18,10 +18,10 @@ document and must be updated whenever the architecture changes.
   `genui_call()` objects created by hand.
 - Live LLM acceptance tests live in `tests/manual/`. Never run them
   automatically; see the README in that directory. The `.env` file at the
-  package root contains `OPENAI_API_KEY`. Git and R builds ignore this file.
-  Load it with `readRenviron(".env")`, and never commit or print it. The
-  designated live model is `gpt-5.6-sol` with
-  `ellmer::params(reasoning_effort = "medium")`.
+  package root contains `OPENAI_API_KEY`, `SHINYGENUI_MODEL`, and
+  `SHINYGENUI_EFFORT`. Git and R builds ignore this file. Load it with
+  `readRenviron(".env")`, never commit or print it, and do not add model or
+  reasoning effort fallbacks to the live tests.
 
 ## Architecture invariants (do not break)
 

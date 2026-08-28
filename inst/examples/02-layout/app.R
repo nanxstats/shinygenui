@@ -6,7 +6,8 @@
 # the second canvas: every component comes back (embedded inputs at their
 # defaults) without a single model call.
 #
-# Requires an OpenAI API key in OPENAI_API_KEY; any ellmer provider works.
+# Requires OPENAI_API_KEY, SHINYGENUI_MODEL, and SHINYGENUI_EFFORT. Load them
+# from a .env file before running the app; see the package README.
 #
 # Try:
 #   1. "Create a row of KPIs: average mpg, average hp, and max wt."
@@ -14,6 +15,21 @@
 #   2. "Below the row, add a histogram of mpg."
 #   3. "Retitle the row to 'Key numbers' and drop the hp box."
 #   4. Press "Replay trace onto the mirror canvas".
+
+if (file.exists(".env")) {
+  readRenviron(".env")
+}
+required_env <- c("OPENAI_API_KEY", "SHINYGENUI_MODEL", "SHINYGENUI_EFFORT")
+missing_env <- required_env[!nzchar(Sys.getenv(required_env))]
+if (length(missing_env) > 0) {
+  stop(
+    sprintf(
+      "Set these variables in .env: %s",
+      paste(missing_env, collapse = ", ")
+    ),
+    call. = FALSE
+  )
+}
 
 library(shiny)
 library(bslib)
@@ -40,7 +56,13 @@ server <- function(input, output, session) {
     genui_components_bslib(data = mtcars)
   )
 
-  chat <- ellmer::chat_openai()
+  chat <- ellmer::chat_openai(
+    model = Sys.getenv("SHINYGENUI_MODEL"),
+    params = ellmer::params(
+      reasoning_effort = Sys.getenv("SHINYGENUI_EFFORT")
+    ),
+    echo = "none"
+  )
 
   handles <- genui_server(
     "live",

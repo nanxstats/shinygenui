@@ -11,15 +11,21 @@ Rscript tests/manual/live-test-browser.R    # headless-Chrome run of the real st
 
 Requirements:
 
-- A `.env` file at the package root containing `OPENAI_API_KEY=...`
-  (gitignored and Rbuildignored; loaded via `readRenviron(".env")`).
+- A `.env` file at the package root containing all three required values:
+
+  ```dotenv
+  OPENAI_API_KEY=<your-api-key>
+  SHINYGENUI_MODEL=<model-id>
+  SHINYGENUI_EFFORT=<reasoning-effort>
+  ```
+
+  The file is gitignored and Rbuildignored. The scripts load it with
+  `readRenviron(".env")`.
 - The browser test additionally needs Google Chrome and the shinytest2 +
   chromote packages; it sets `NOT_CRAN` itself and writes
   `live-app-final.png` (gitignored) next to the scripts.
 
-The model defaults to `gpt-5.6-sol` with medium reasoning effort; override
-with the `SHINYGENUI_LIVE_MODEL` environment variable. Each script prints
-`[PASS]`/`[FAIL]` lines and exits nonzero on any failure.
+Each script prints `[PASS]`/`[FAIL]` lines and exits nonzero on any failure.
 
 Timing note for assertions: components land on the canvas *while* the model
 is still streaming narration (progressive rendering). Any check that the
