@@ -81,9 +81,9 @@ changes.
   [`ellmer::tool()`](https://ellmer.tidyverse.org/reference/tool.html)
   requires the function’s formals to exactly match the declared
   `arguments`. Generate formals with
-  [`rlang::new_function()`](https://rdrr.io/pkg/rlang/man/new_function.html)
+  [`rlang::new_function()`](https://rlang.r-lib.org/reference/new_function.html)
   and
-  [`rlang::pairlist2()`](https://rdrr.io/pkg/rlang/man/pairlist2.html).
+  [`rlang::pairlist2()`](https://rlang.r-lib.org/reference/pairlist2.html).
 - `chat_openai(api_key = )` is deprecated; use
   `credentials = function() list(api_key = ...)` in tests.
 - [`shiny::MockShinySession`](https://rdrr.io/pkg/shiny/man/MockShinySession.html)

@@ -8,6 +8,10 @@
   effort from the required `SHINYGENUI_MODEL` and `SHINYGENUI_EFFORT`
   environment variables instead of relying on defaults
   ([\#9](https://github.com/nanxstats/shinygenui/issues/9)).
+- The `01-mtcars-explorer` example now offers prompt buttons above the
+  chat composer. A click fills and focuses the composer without
+  submitting
+  ([\#10](https://github.com/nanxstats/shinygenui/issues/10)).
 
 ## shinygenui 0.1.0
 
