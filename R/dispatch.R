@@ -395,7 +395,7 @@ validate_arg_value <- function(type, value, arg, component) {
       validate_arg_value(properties[[nm]], value[[nm]], arg, component)
     }
   }
-  # Other type kinds (e.g. raw JSON schemas) are passed through untouched;
+  # Other type kinds (for example, raw JSON schemas) are passed through untouched;
   # the provider already validated them against the declared schema.
   invisible(value)
 }

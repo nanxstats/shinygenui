@@ -4,33 +4,16 @@
 [![R-CMD-check](https://github.com/nanxstats/shinygenui/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/nanxstats/shinygenui/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-shinygenui brings declarative generative UI to Shiny.
-You define a finite catalog of typed UI components as guardrails.
-End users of your deployed app talk to an LLM through a chat panel, and the
-model answers by composing instances of those components, streamed
-progressively onto a canvas. The model can also update and remove components
-it previously created, so the generated view is conversationally mutable,
-not append-only.
+shinygenui lets you add generative UI to Shiny apps.
+As the app developer, you choose a fixed set of UI components and describe
+the arguments that each component accepts. Together, these components form
+a catalog. When someone asks a question in the chat panel, the model chooses
+components from the catalog and adds them to a canvas. It can also update or
+remove components as the conversation continues.
 
-It is the R/Shiny analogue of Vercel's json-render and Google's A2UI
-but intentionally narrower: one language, one framework, one deployment story.
-An regular Shiny app (deployed on Posit Connect for example), with no sidecar
-servers, no Node, and no schemas or JSON authored manually.
-
-## How it stays safe
-
-- **Tool calls, not code generation.** Every catalog entry compiles to an
-  [ellmer](https://ellmer.tidyverse.org) tool. The model "renders" a
-  component by calling its tool with typed arguments; it never emits R code,
-  and the package never calls `eval()` or `parse()` on model output.
-  Arguments are data, interpreted only by your component functions.
-- **Grounded, per-session schemas.** Catalogs can be built inside the server
-  function, so argument types can enumerate live facts. For example, the
-  columns of the active dataset as enum values. A hallucinated column is a
-  schema violation the model has to correct.
-- **Error feedback loop.** Validation and rendering failures go back to the
-  model as tool errors with actionable messages; the session never crashes.
-  A prompt-injection worst case is an ugly dashboard, not code execution.
+The package is similar to Vercel's json-render and Google's A2UI, but has a
+much smaller scope. It uses R, Shiny, and the deployment approaches you already
+use for Shiny apps. You do not need Node, another server, or schemas written by hand.
 
 ## Installation
 
@@ -39,11 +22,27 @@ servers, no Node, and no schemas or JSON authored manually.
 pak::pak("nanxstats/shinygenui")
 ```
 
+## How it works safely
+
+- **The model calls tools instead of writing code.** Each catalog entry
+  becomes an [ellmer](https://ellmer.tidyverse.org) tool with typed arguments.
+  The model calls these tools with data. It never writes R code, and
+  shinygenui never calls `eval()` or `parse()` on model output.
+- **The catalog can reflect the current session.** If you create the catalog
+  inside the server function, its argument types can use values that are
+  known at that point. For example, an argument can only accept names from
+  the current dataset. If the model invents a column, validation rejects it.
+- **Errors return to the model.** If validation or rendering fails, the model
+  receives an error that explains what went wrong and can try again.
+  The Shiny session keeps running. Even if a prompt injection changes what the
+  model asks for, it cannot make the package run code outside the catalog.
+
 ## Example
 
-A complete app: chat sidebar, canvas, and a starter catalog grounded on
-`mtcars`. Ask for "mpg vs. hp and a value box with the average mpg", then
-"color the scatter by cylinders". The existing plot updates in place.
+Here is a complete app with a chat sidebar, a canvas, and a catalog based on
+`mtcars`. Start by asking for a plot of `mpg` against `hp` and a value box with
+the average `mpg`. Then ask the model to color the points by cylinder count.
+It updates the existing plot in place.
 
 ``` r
 library(shiny)
@@ -61,7 +60,7 @@ server <- function(input, output, session) {
   genui_server(
     "canvas",
     catalog = catalog,
-    chat = ellmer::chat_anthropic(), # any ellmer provider works
+    chat = ellmer::chat_anthropic(), # Any ellmer provider works
     data = reactive(mtcars),
     chat_id = "chat",
     system_prompt = genui_prompt(catalog, context = "The data is mtcars.")
@@ -71,11 +70,11 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-The starter pack includes a histogram whose bin-count slider is a live Shiny
-input embedded in the generated component: dragging it re-renders instantly,
-with no LLM round trip.
+The included components have the same interactive behavior as any other Shiny UI.
+For example, the histogram has a slider for the number of bins. Moving the
+slider redraws the plot immediately without another request to the model.
 
-Defining your own component is one call:
+You can define your own component with `genui_component()`:
 
 ``` r
 genui_component(
@@ -85,20 +84,31 @@ genui_component(
     title = "Short label above the value.",
     column = ellmer::type_enum(names(mtcars), "Column to summarize.")
   ),
-  ui = function(id, args) { ... },       # htmltools tags; NS(id) for inputs
-  server = function(id, args, data) { ... } # optional moduleServer()
+  ui = function(id, args) {
+    ...
+  }, # Return htmltools tags
+  server = function(id, args, data) {
+    ...
+  } # Optional Shiny module
 )
 ```
 
-Runnable example apps live in `inst/examples/`: `01-mtcars-explorer`
-(the basics) and `02-layout` (container rows, plus rebuilding a canvas from
-its trace with `genui_replay()`, no LLM required).
+The `inst/examples/` directory contains two runnable apps:
+
+``` r
+shiny::runApp(system.file("examples/01-mtcars-explorer/", package = "shinygenui"))
+shiny::runApp(system.file("examples/02-layout/", package = "shinygenui"))
+```
+
+`01-mtcars-explorer` introduces the basics. `02-layout` shows how to
+group components in rows and rebuild a canvas from its saved history with
+`genui_replay()`.
 
 ## Learn more
 
-- `vignette("shinygenui")` walks through the full model: catalogs, grounded
-  schemas, lifecycle tools, embedded interactivity, and trace/replay.
-- `DESIGN.md` in the repository documents the architecture.
+- `vignette("shinygenui")` explains catalogs, argument validation, updates,
+  interactive components, and replay.
+- [`DESIGN.md`](https://nanx.me/shinygenui/DESIGN.html) documents the architecture.
 
 ## License
 
