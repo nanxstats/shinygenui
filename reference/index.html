@@ -39,9 +39,108 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="components-and-catalogs">Components and catalogs<a class="anchor" aria-label="anchor" href="#components-and-catalogs"></a></h2>
+
+      <div class="section-desc"><p>Define the finite set of typed components the model can render.</p></div>
+
+      <dl></dl></div><div class="section level2">
 
 
+
+
+      <dl><dt>
+
+          <code><a href="genui_component.html">genui_component()</a></code>
+
+        </dt>
+        <dd>Define a generative UI component</dd>
+
+        <dt>
+
+          <code><a href="genui_catalog.html">genui_catalog()</a></code>
+
+        </dt>
+        <dd>Collect components into a catalog</dd>
+      </dl></div><div class="section level2">
+      <h2 id="built-in-components">Built-in components<a class="anchor" aria-label="anchor" href="#built-in-components"></a></h2>
+
+      <div class="section-desc"><p>Add ready-made components and layouts to a catalog.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="genui_components_bslib.html">genui_components_bslib()</a></code>
+
+        </dt>
+        <dd>Starter component pack built on bslib</dd>
+
+        <dt>
+
+          <code><a href="genui_card_row.html">genui_card_row()</a></code>
+
+        </dt>
+        <dd>Container component: a titled row of cards</dd>
+      </dl></div><div class="section level2">
+      <h2 id="shiny-integration">Shiny integration<a class="anchor" aria-label="anchor" href="#shiny-integration"></a></h2>
+
+      <div class="section-desc"><p>Create a generative UI canvas and connect it to an ellmer chat.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="genui_canvas.html">genui_canvas()</a></code>
+
+        </dt>
+        <dd>Canvas container for generated components</dd>
+
+        <dt>
+
+          <code><a href="genui_server.html">genui_server()</a></code>
+
+        </dt>
+        <dd>Server logic for a generative UI canvas</dd>
+
+        <dt>
+
+          <code><a href="genui_prompt.html">genui_prompt()</a></code>
+
+        </dt>
+        <dd>Assemble the system prompt from a catalog</dd>
+      </dl></div><div class="section level2">
+      <h2 id="trace-and-replay">Trace and replay<a class="anchor" aria-label="anchor" href="#trace-and-replay"></a></h2>
+
+      <div class="section-desc"><p>Capture and restore the validated operations that produced a canvas.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="genui_trace.html">genui_trace()</a></code>
+
+        </dt>
+        <dd>Read the ordered call trace of a canvas</dd>
+
+        <dt>
+
+          <code><a href="genui_replay.html">genui_replay()</a></code>
+
+        </dt>
+        <dd>Rebuild a canvas from a saved trace, no LLM required</dd>
+      </dl></div><div class="section level2">
+      <h2 id="dispatch">Dispatch<a class="anchor" aria-label="anchor" href="#dispatch"></a></h2>
+
+      <div class="section-desc"><p>Construct, validate, and plan model-issued tool calls without Shiny or an LLM.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -57,75 +156,13 @@
 
         <dt>
 
-          <code><a href="genui_canvas.html">genui_canvas()</a></code>
-
-        </dt>
-        <dd>Canvas container for generated components</dd>
-
-        <dt>
-
-          <code><a href="genui_card_row.html">genui_card_row()</a></code>
-
-        </dt>
-        <dd>Container component: a titled row of cards</dd>
-
-        <dt>
-
-          <code><a href="genui_catalog.html">genui_catalog()</a></code>
-
-        </dt>
-        <dd>Collect components into a catalog</dd>
-
-        <dt>
-
-          <code><a href="genui_component.html">genui_component()</a></code>
-
-        </dt>
-        <dd>Define a generative UI component</dd>
-
-        <dt>
-
-          <code><a href="genui_components_bslib.html">genui_components_bslib()</a></code>
-
-        </dt>
-        <dd>Starter component pack built on bslib</dd>
-
-        <dt>
-
           <code><a href="genui_dispatch.html">genui_dispatch()</a></code>
 
         </dt>
         <dd>Validate one tool call and plan its effect</dd>
-
-        <dt>
-
-          <code><a href="genui_prompt.html">genui_prompt()</a></code>
-
-        </dt>
-        <dd>Assemble the system prompt from a catalog</dd>
-
-        <dt>
-
-          <code><a href="genui_replay.html">genui_replay()</a></code>
-
-        </dt>
-        <dd>Rebuild a canvas from a saved trace, no LLM required</dd>
-
-        <dt>
-
-          <code><a href="genui_server.html">genui_server()</a></code>
-
-        </dt>
-        <dd>Server logic for a generative UI canvas</dd>
-
-        <dt>
-
-          <code><a href="genui_trace.html">genui_trace()</a></code>
-
-        </dt>
-        <dd>Read the ordered call trace of a canvas</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
