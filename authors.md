@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/nanxstats/shinygenui/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/nanxstats/shinygenui/blob/v0.1.0/DESCRIPTION)
 
 Xiao N (2026). *shinygenui: Generative UI for 'shiny'*. R package
 version 0.1.0, <https://nanx.me/shinygenui/>.
