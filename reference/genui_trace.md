@@ -34,3 +34,27 @@ A reactive expression returning the trace: a list of entries of the form
 argument delta). Persist it with
 [`saveRDS()`](https://rdrr.io/r/base/readRDS.html) to replay in a later
 session.
+
+## Examples
+
+``` r
+note <- genui_component(
+  name = "note_card",
+  description = "A card showing a short note.",
+  args = list(text = "The note text."),
+  ui = function(id, args) htmltools::p(args$text)
+)
+catalog <- genui_catalog(note)
+chat <- ellmer::chat_openai(
+  model = "gpt-5.6-sol",
+  credentials = function() list(api_key = "not-used")
+)
+shiny::testServer(
+  genui_server,
+  args = list(id = "canvas", catalog = catalog, chat = chat),
+  {
+    trace <- genui_trace(session)
+    stopifnot(identical(trace(), list()))
+  }
+)
+```
