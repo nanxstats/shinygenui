@@ -76,6 +76,15 @@ ui <- page_sidebar(
         grid-row: 3;
       }
 
+      #chat .shiny-chat-input textarea {
+        --bs-border-radius: var(--bs-border-radius-sm, 0.25rem);
+        scrollbar-width: none;
+      }
+
+      #chat .shiny-chat-input textarea::-webkit-scrollbar {
+        display: none;
+      }
+
       .example-prompts {
         display: flex;
         flex-direction: column;
