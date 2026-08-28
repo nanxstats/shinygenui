@@ -34,3 +34,4 @@ querychat = "*"
 [references]
 json-render = "vercel-labs/json-render"
 a2ui = "a2ui-project/a2ui"
+extrachecks = "DavisVaughan/extrachecks"

@@ -2,8 +2,8 @@ version = 1
 okr-version = "0.1.7"
 generated = "2026-08-27T00:00:00Z"
 snapshot = "2026-08-27"
-config-digest = "sha256:6fad8ee72fa34349eb25096409c62f52846a51b09feadb972ed99cc5b5d45860"
-environment-digest = "sha256:fdfca7f4e8d88b46741d123491e6cec3b305f4e33e443a1052855638df416e83"
+config-digest = "sha256:0b1a5684c47a7f6331f5e95331934e0e522805c229216d84886ff478f607f84b"
+environment-digest = "sha256:4b1ae339f010c1032948b15a223750d26be065a1a6f7061f4e84ac02a9c07c59"
 
 [[package]]
 name = "DT"
@@ -178,11 +178,19 @@ license = "GPL-3"
 [[reference]]
 name = "a2ui"
 source = "github::a2ui-project/a2ui"
-commit = "5851b3f48428a8566764e1cbdf28f4eb3d48ffa2"
+commit = "18ae5afe3aa32bd24270ec87100b9031ba95561d"
 fetch-method = "forge-tarball"
-artifact-digest = "sha256:8b2cc73221ff01e6a26e3d961a542b070b78509d4157b108049eb8c40d0ec6dc"
-tree-digest = "sha256:89e208e48794f03e02294c2e98be5ea59901b5f745b843bed50ef07c728714fd"
+artifact-digest = "sha256:a646015c853f9f1627b5668efc44a2d9f65cee506c547567dacff60d8523dd2f"
+tree-digest = "sha256:732910097bd843a851b9c5868d01acabdcc451e663e6d307f3f542a6f94910b7"
 license = "MIT"
+
+[[reference]]
+name = "extrachecks"
+source = "github::DavisVaughan/extrachecks"
+commit = "a37e1ee87e47e99ba0ed88a4dfe417141ca5d89e"
+fetch-method = "forge-tarball"
+artifact-digest = "sha256:b2937442a60ec86d06751db2b166406ba2e8cea1a3be51cdc1560a622c3bb71a"
+tree-digest = "sha256:72798d72a73e0a440c376925b28ebef34bcb705be1ab187b9db4bb696a1c6aff"
 
 [[reference]]
 name = "json-render"
