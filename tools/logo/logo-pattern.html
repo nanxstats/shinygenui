@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>shinygenui generative logo field</title>
+  <script src="https://cdn.jsdelivr.net/npm/p5@2.3.2/lib/p5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/p5.brush@2.2.2/dist/p5.brush.js"></script>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #f7f8f5;
+    }
+
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    window.addEventListener("error", function (event) {
+      document.body.dataset.renderError = event.message;
+    });
+    window.addEventListener("unhandledrejection", function (event) {
+      document.body.dataset.renderError = String(event.reason);
+    });
+
+    const ART_WIDTH = 1106;
+    const ART_HEIGHT = 1280;
+    const PAPER = "#f7f8f5";
+
+    const PLANES = [
+      {
+        color: "#718894",
+        opacity: 142,
+        underpaint: 50,
+        bleed: 0.16,
+        texture: 0.62,
+        angle: 18,
+        points: [
+          [-140, -120], [450, -120], [630, 70], [520, 320],
+          [230, 470], [-140, 360]
+        ]
+      },
+      {
+        color: "#b94732",
+        opacity: 166,
+        underpaint: 68,
+        bleed: 0.14,
+        texture: 0.58,
+        angle: 154,
+        points: [
+          [390, -100], [1250, -100], [1250, 500], [1010, 560],
+          [790, 400], [620, 250]
+        ]
+      },
+      {
+        color: "#6b7e4c",
+        opacity: 158,
+        underpaint: 64,
+        bleed: 0.18,
+        texture: 0.66,
+        angle: 42,
+        points: [
+          [-160, 300], [180, 350], [370, 500], [300, 690],
+          [90, 870], [-160, 740]
+        ]
+      },
+      {
+        color: "#326b62",
+        opacity: 162,
+        underpaint: 66,
+        bleed: 0.17,
+        texture: 0.64,
+        angle: 208,
+        points: [
+          [1240, 350], [1030, 370], [800, 500], [820, 720],
+          [1020, 870], [1240, 790]
+        ]
+      },
+      {
+        color: "#b9684d",
+        opacity: 158,
+        underpaint: 64,
+        bleed: 0.16,
+        texture: 0.61,
+        angle: 322,
+        points: [
+          [-140, 700], [170, 730], [460, 850], [610, 1100],
+          [420, 1370], [-140, 1370]
+        ]
+      },
+      {
+        color: "#4e6660",
+        opacity: 164,
+        underpaint: 68,
+        bleed: 0.15,
+        texture: 0.6,
+        angle: 236,
+        points: [
+          [470, 850], [780, 700], [1030, 820], [1240, 790],
+          [1240, 1370], [420, 1370]
+        ]
+      },
+      {
+        color: "#edf2ef",
+        opacity: 118,
+        underpaint: 42,
+        bleed: 0.1,
+        texture: 0.5,
+        angle: 8,
+        points: [
+          [160, 500], [370, 410], [685, 420], [920, 520], [1030, 650],
+          [875, 790], [640, 880], [340, 850], [100, 720], [80, 610]
+        ]
+      }
+    ];
+
+    function paintPlane(plane, index) {
+      brush.noFill();
+      brush.wash(plane.color, plane.underpaint);
+      brush.polygon(plane.points);
+      brush.noWash();
+
+      randomSeed(73021 + index * 101);
+      brush.fill(plane.color, plane.opacity);
+      brush.fillBleed(plane.bleed, "out", plane.angle);
+      brush.fillTexture(plane.texture, 0.28, true);
+      brush.polygon(plane.points);
+      brush.noFill();
+    }
+
+    function setup() {
+      pixelDensity(1);
+      createCanvas(ART_WIDTH, ART_HEIGHT, WEBGL);
+      brush.load();
+
+      background(PAPER);
+      translate(-width / 2, -height / 2);
+
+      angleMode(DEGREES);
+      randomSeed(73021);
+      noiseSeed(73021);
+      brush.scaleBrushes(2);
+
+      brush.noStroke();
+      brush.noHatch();
+      PLANES.forEach(paintPlane);
+
+      document.body.dataset.rendered = "true";
+    }
+  </script>
+</body>
+
+</html>

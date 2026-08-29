@@ -1,4 +1,4 @@
-# shinygenui
+# shinygenui <a href="https://nanx.me/shinygenui/"><img src="man/figures/logo.png" align="right" height="139" alt="shinygenui website" /></a>
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/nanxstats/shinygenui/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/nanxstats/shinygenui/actions/workflows/R-CMD-check.yaml)
