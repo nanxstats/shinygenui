@@ -2,7 +2,7 @@
 
 ## shinygenui (development version)
 
-### Improvements
+### Examples
 
 - Example and acceptance test apps now read their model and reasoning
   effort from the required `SHINYGENUI_MODEL` and `SHINYGENUI_EFFORT`
@@ -12,6 +12,14 @@
   chat composer. A click fills and focuses the composer without
   submitting
   ([\#10](https://github.com/nanxstats/shinygenui/issues/10)).
+
+### Documentation
+
+- The README now includes a recording of the mtcars explorer example
+  ([\#11](https://github.com/nanxstats/shinygenui/issues/11)).
+- Code examples now consistently use the same model provider while
+  continuing to support any ellmer provider
+  ([\#8](https://github.com/nanxstats/shinygenui/issues/8)).
 
 ## shinygenui 0.1.0
 
