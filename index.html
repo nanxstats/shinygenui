@@ -6,6 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Generative UI for shiny • shinygenui</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" sizes="any" href="favicon.ico">
+<link rel="manifest" href="site.webmanifest">
 <!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
   window.MathJax = {
     chtml: {
@@ -19,6 +24,7 @@
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Generative UI for shiny">
 <meta name="description" content="Build interactive user interfaces for shiny applications through a conversation with a large language model (LLM). Developers choose a set of reusable components, and the model arranges and updates those components as the user describes what they need. Each component's inputs are checked before it is shown, and the model supplies data rather than executable code. Applications can also save and replay the sequence of interface changes without contacting a model. For background on generative user interfaces, see Leviathan et al. (2026) &lt;doi:10.48550/arXiv.2604.09577&gt;.">
 <meta property="og:description" content="Build interactive user interfaces for shiny applications through a conversation with a large language model (LLM). Developers choose a set of reusable components, and the model arranges and updates those components as the user describes what they need. Each component's inputs are checked before it is shown, and the model supplies data rather than executable code. Applications can also save and replay the sequence of interface changes without contacting a model. For background on generative user interfaces, see Leviathan et al. (2026) &lt;doi:10.48550/arXiv.2604.09577&gt;.">
+<meta property="og:image" content="https://nanx.me/shinygenui/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -54,8 +60,11 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="shinygenui">shinygenui<a class="anchor" aria-label="anchor" href="#shinygenui"></a>
-</h1></div>
+<div class="page-header">
+<img src="logo.png" class="logo" alt=""><h1 id="shinygenui-">shinygenui 
+<a class="anchor" aria-label="anchor" href="#shinygenui-"></a>
+</h1>
+</div>
 <!-- badges: start -->
 
 <p>shinygenui lets you add generative UI to Shiny apps. As the app developer, you choose a fixed set of UI components and describe the arguments that each component accepts. Together, these components form a catalog. When someone asks a question in the chat panel, the model chooses components from the catalog and adds them to a canvas. It can also update or remove components as the conversation continues.</p>
@@ -101,9 +110,9 @@ SHINYGENUI_EFFORT=&lt;reasoning-effort&gt;</code></pre>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/bslib/" class="external-link">bslib</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://nanx.me/shinygenui/">shinygenui</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/bslib/man/page_sidebar.html" class="external-link">page_sidebar</a></span><span class="op">(</span></span>
+<span><span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rstudio.github.io/bslib/reference/page_sidebar.html" class="external-link">page_sidebar</a></span><span class="op">(</span></span>
 <span>  title <span class="op">=</span> <span class="st">"mtcars explorer"</span>,</span>
-<span>  sidebar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/bslib/man/sidebar.html" class="external-link">sidebar</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">380</span>, <span class="fu">shinychat</span><span class="fu">::</span><span class="fu"><a href="https://posit-dev.github.io/shinychat/r/reference/chat_ui.html" class="external-link">chat_ui</a></span><span class="op">(</span><span class="st">"chat"</span>, height <span class="op">=</span> <span class="st">"100%"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  sidebar <span class="op">=</span> <span class="fu"><a href="https://rstudio.github.io/bslib/reference/sidebar.html" class="external-link">sidebar</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">380</span>, <span class="fu">shinychat</span><span class="fu">::</span><span class="fu"><a href="https://posit-dev.github.io/shinychat/r/reference/chat_ui.html" class="external-link">chat_ui</a></span><span class="op">(</span><span class="st">"chat"</span>, height <span class="op">=</span> <span class="st">"100%"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="reference/genui_canvas.html">genui_canvas</a></span><span class="op">(</span><span class="st">"canvas"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
