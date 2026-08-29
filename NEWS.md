@@ -1,5 +1,9 @@
 # shinygenui (development version)
 
+## Branding
+
+- Add a hex sticker logo with a p5.brush watercolor polygon background (#14).
+
 ## Examples
 
 - Example and acceptance test apps now read their model and reasoning effort
