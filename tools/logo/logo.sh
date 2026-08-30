@@ -26,10 +26,9 @@ fi
 
 # Render the deterministic p5.brush field at 2x the final logo resolution.
 "$CHROME_BIN" --headless \
+    --enable-gpu \
+    --disable-software-rasterizer \
     --hide-scrollbars \
-    --allow-file-access-from-files \
-    --enable-unsafe-swiftshader \
-    --use-angle=swiftshader \
     --force-device-scale-factor=1 \
     --window-size=1106,1280 \
     --virtual-time-budget=10000 \
@@ -64,7 +63,6 @@ magick "$PATTERN_PNG" \
     --disable-gpu \
     --no-margins \
     --no-pdf-header-footer \
-    --print-to-pdf-no-header \
     --print-to-pdf="$TEXT_PDF" \
     "$TEXT_SVG"
 
