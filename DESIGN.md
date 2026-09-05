@@ -167,7 +167,7 @@ provides reactive access to the trace.
   with `stream_async()` and `chat_append()`, so work in one session does
   not block other sessions.
   [`ellmer::stream_controller()`](https://ellmer.tidyverse.org/reference/stream_controller.html)
-  supports the cancel button.
+  supports the cancel button and requires ellmer 0.4.1 or later.
 - `data` is a reactive passed to component servers. Code that runs
   during dispatch, such as `check()`, receives the current isolated
   value. This keeps the core independent of Shiny. Replay uses the same
