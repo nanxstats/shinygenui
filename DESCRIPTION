@@ -23,7 +23,7 @@ Depends:
 Imports:
     bslib,
     cli,
-    ellmer (>= 0.4.0),
+    ellmer (>= 0.4.1),
     htmltools,
     jsonlite,
     promises,

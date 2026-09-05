@@ -1,5 +1,9 @@
 # shinygenui (development version)
 
+## Dependencies
+
+- Require ellmer >= 0.4.1 for `stream_controller()`, which powers chat cancellation (#17).
+
 ## Branding
 
 - Add a hex sticker logo with a p5.brush watercolor polygon background (#14).
