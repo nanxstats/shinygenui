@@ -32,6 +32,8 @@ and updating them as the conversation continues.
 pak::pak("nanxstats/shinygenui")
 ```
 
+shinygenui requires ellmer 0.4.1 or later for chat cancellation support.
+
 ## How it works safely
 
 - **The model calls tools instead of writing code.** Each catalog entry
