@@ -2,8 +2,7 @@
 
 ## Dependencies
 
-- Require ellmer >= 0.4.1 for `stream_controller()`, which powers chat
-  cancellation.
+- Require ellmer >= 0.4.1 for `stream_controller()`, which powers chat cancellation (#17).
 
 ## Branding
 
