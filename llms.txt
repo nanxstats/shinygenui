@@ -23,6 +23,15 @@ recording.](https://github.com/user-attachments/assets/9ce7cbbf-94f3-4205-9b7b-5
 
 ## Installation
 
+You can install shinygenui from CRAN:
+
+``` r
+
+install.packages("shinygenui")
+```
+
+Or try the development version from GitHub:
+
 ``` r
 
 # install.packages("pak")
