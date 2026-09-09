@@ -1,6 +1,7 @@
 # shinygenui <a href="https://nanx.me/shinygenui/"><img src="man/figures/logo.png" align="right" height="139" alt="shinygenui website" /></a>
 
 <!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/shinygenui)](https://cran.r-project.org/package=shinygenui)
 [![R-CMD-check](https://github.com/nanxstats/shinygenui/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/nanxstats/shinygenui/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
@@ -26,6 +27,14 @@ and updating them as the conversation continues.
 </video>
 
 ## Installation
+
+You can install shinygenui from CRAN:
+
+``` r
+install.packages("shinygenui")
+```
+
+Or try the development version from GitHub:
 
 ``` r
 # install.packages("pak")
