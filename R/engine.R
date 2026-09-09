@@ -68,7 +68,7 @@ GenuiEngine <- R6::R6Class(
       ellmer::ContentToolResult(
         value = value,
         extra = list(
-          display = list(
+          display = shinychat::tool_result_display(
             title = "Canvas: read state",
             markdown = sprintf("Read %d instance(s).", length(state)),
             show_request = FALSE,
@@ -277,7 +277,7 @@ plan_tool_result <- function(plan) {
   ellmer::ContentToolResult(
     value = value,
     extra = list(
-      display = list(
+      display = shinychat::tool_result_display(
         title = title,
         markdown = value,
         show_request = FALSE,

@@ -41,7 +41,10 @@ library(shinygenui)
 
 ui <- page_sidebar(
   title = "mtcars explorer",
-  sidebar = sidebar(width = 380, shinychat::chat_ui("chat", height = "100%")),
+  sidebar = sidebar(
+    width = 380,
+    shinychat::chat_ui("chat", height = "100%")
+  ),
   genui_canvas("canvas")
 )
 

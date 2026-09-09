@@ -9,11 +9,13 @@
 #' rendering failures are returned to the model as tool errors and never
 #' crash the session.
 #'
-#' With `chat_id`, the package also runs the chat loop for a
-#' [shinychat::chat_ui()] you placed in the UI: user input is streamed
-#' through `chat$stream_async()` inside a [shiny::ExtendedTask] (so other
-#' sessions never block) and appended with [shinychat::chat_append()],
-#' with cancel support. With `chat_id = NULL` you run your own loop on
+#' With `chat_id`, the package connects a [shinychat::chat_ui()] you placed
+#' in the UI using [shinychat::chat_server()]. It handles asynchronous
+#' streaming, cancellation, and attachments. Set `allow_attachments = FALSE`
+#' in `chat_ui()` to disable uploads; attachments provide context to the
+#' model and do not replace the component `data`. Conversation history is
+#' disabled because restoring a conversation also requires restoring its
+#' canvas and registry. With `chat_id = NULL` you run your own loop on
 #' `chat`; the registered tools work all the same.
 #'
 #' Create the `Chat` object inside your server function, one per session.
@@ -49,9 +51,9 @@
 #' @param chat_id Id of a [shinychat::chat_ui()] placed in the UI at the
 #'   same namespace level as [genui_canvas()], or `NULL` (default) to manage
 #'   the chat loop yourself.
-#' @param greeting Optional markdown string shown as the assistant's first
-#'   message (only used when `chat_id` is set). It is display-only and never
-#'   sent to the model.
+#' @param greeting Optional markdown welcome message, shown while the chat
+#'   is empty and dismissed after the first user message (only used when
+#'   `chat_id` is set). It is display-only and never sent to the model.
 #' @param system_prompt System prompt to install on `chat`. Defaults to
 #'   [genui_prompt()] of the catalog; use `genui_prompt(catalog, context =
 #'   ...)` to add app context, or pass any string to take full control.
@@ -148,61 +150,22 @@ genui_server <- function(
   })
 }
 
-# Runs the shinychat streaming loop on the caller's session: greeting,
-# user input -> chat$stream_async() -> chat_append(), and cancel. Tool calls
-# fire inside the async stream; the compiled tools close over the module
-# session explicitly, so nothing here depends on the ambient domain once
-# streaming starts.
+# chat_server() also uses the current domain for observers and asynchronous
+# appends, so bind both it and the explicit session to the caller's scope.
 wire_chat <- function(chat, chat_id, greeting, session) {
-  if (!is.null(greeting) && any(nzchar(greeting))) {
-    greet_observer <- shiny::observe(
-      {
-        greet_observer$destroy()
-        shinychat::chat_append(
-          chat_id,
-          paste(greeting, collapse = "\n"),
-          session = session
-        )
-      },
-      domain = session
-    )
+  if (is.null(greeting) || !any(nzchar(greeting))) {
+    greeting <- NULL
+  } else {
+    greeting <- paste(greeting, collapse = "\n")
   }
 
-  controller <- ellmer::stream_controller()
-
-  stream_task <- shiny::ExtendedTask$new(function(chat, user_input, controller) {
-    stream <- chat$stream_async(
-      user_input,
-      stream = "content",
-      controller = controller
-    )
-    promises::then(
-      promises::promise_resolve(stream),
-      function(stream) {
-        shinychat::chat_append(chat_id, stream, session = session)
-      }
+  shiny::withReactiveDomain(session, {
+    shinychat::chat_server(
+      chat_id,
+      client = chat,
+      greeting = greeting,
+      history = FALSE,
+      session = session
     )
   })
-
-  shiny::observeEvent(
-    session$input[[paste0(chat_id, "_user_input")]],
-    {
-      stream_task$invoke(
-        chat,
-        session$input[[paste0(chat_id, "_user_input")]],
-        controller
-      )
-    },
-    domain = session,
-    label = "shinygenui_chat_user_input"
-  )
-
-  shiny::observeEvent(
-    session$input[[paste0(chat_id, "_cancel")]],
-    {
-      controller$cancel()
-    },
-    domain = session,
-    label = "shinygenui_chat_cancel"
-  )
 }

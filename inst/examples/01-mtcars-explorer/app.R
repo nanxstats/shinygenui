@@ -67,13 +67,14 @@ example_prompt_buttons <- div(
 ui <- page_sidebar(
   tags$head(
     tags$style(HTML("
-      #chat .shiny-chat-footer {
-        grid-row: 2;
-        padding: 0 0 0.5rem;
+      #chat .shiny-chat-composer {
+        display: flex;
+        flex-direction: column;
       }
 
-      #chat .shiny-chat-input {
-        grid-row: 3;
+      #chat .shiny-chat-input-toolbar {
+        order: -1;
+        padding-bottom: 0.5rem;
       }
 
       #chat .shiny-chat-input textarea {
@@ -111,7 +112,7 @@ ui <- page_sidebar(
       "chat",
       height = "100%",
       fill = TRUE,
-      footer = example_prompt_buttons
+      toolbar_input = example_prompt_buttons
     )
   ),
   genui_canvas("canvas", placeholder = "Ask a question to build this view.")

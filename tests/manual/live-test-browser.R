@@ -1,4 +1,4 @@
-# Live browser test: drives the real app (wire_chat streaming loop) in
+# Live browser test: drives the real app (shinychat::chat_server loop) in
 # headless Chrome via shinytest2. Validates the greeting, the ExtendedTask +
 # stream_async + chat_append path, progressive insertUI with dependency
 # hoisting (plots actually render), and the embedded slider re-rendering
@@ -39,7 +39,7 @@ shell_count <- function() {
   app$get_js('document.querySelectorAll("#canvas-canvas .genui-shell").length')
 }
 
-# Greeting arrives through wire_chat's one-shot observer (no LLM call).
+# Greeting arrives through shinychat's welcome message API (no LLM call).
 app$wait_for_js('(document.querySelector("#chat .shiny-chat-messages")?.textContent ?? "").includes("mtcars")', timeout = 30000)
 pass(TRUE, "greeting rendered in the chat")
 

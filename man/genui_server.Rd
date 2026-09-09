@@ -30,9 +30,9 @@ to \code{check()} hooks at validation time.}
 same namespace level as \code{\link[=genui_canvas]{genui_canvas()}}, or \code{NULL} (default) to manage
 the chat loop yourself.}
 
-\item{greeting}{Optional markdown string shown as the assistant's first
-message (only used when \code{chat_id} is set). It is display-only and never
-sent to the model.}
+\item{greeting}{Optional markdown welcome message, shown while the chat
+is empty and dismissed after the first user message (only used when
+\code{chat_id} is set). It is display-only and never sent to the model.}
 
 \item{system_prompt}{System prompt to install on \code{chat}. Defaults to
 \code{\link[=genui_prompt]{genui_prompt()}} of the catalog; use \code{genui_prompt(catalog, context = ...)} to add app context, or pass any string to take full control.}
@@ -53,11 +53,13 @@ rendering failures are returned to the model as tool errors and never
 crash the session.
 }
 \details{
-With \code{chat_id}, the package also runs the chat loop for a
-\code{\link[shinychat:chat_ui]{shinychat::chat_ui()}} you placed in the UI: user input is streamed
-through \code{chat$stream_async()} inside a \link[shiny:ExtendedTask]{shiny::ExtendedTask} (so other
-sessions never block) and appended with \code{\link[shinychat:chat_append]{shinychat::chat_append()}},
-with cancel support. With \code{chat_id = NULL} you run your own loop on
+With \code{chat_id}, the package connects a \code{\link[shinychat:chat_ui]{shinychat::chat_ui()}} you placed
+in the UI using \code{\link[shinychat:chat_server]{shinychat::chat_server()}}. It handles asynchronous
+streaming, cancellation, and attachments. Set \code{allow_attachments = FALSE}
+in \code{chat_ui()} to disable uploads; attachments provide context to the
+model and do not replace the component \code{data}. Conversation history is
+disabled because restoring a conversation also requires restoring its
+canvas and registry. With \code{chat_id = NULL} you run your own loop on
 \code{chat}; the registered tools work all the same.
 
 Create the \code{Chat} object inside your server function, one per session.
