@@ -5,12 +5,12 @@
 - Require shinychat >= 0.5.0 and delegate streaming, cancellation, and
   attachments to `chat_server()`. Conversation history stays disabled until
   it can restore the canvas and registry together. The package no longer
-  directly imports {promises}.
+  directly imports {promises} (#21).
 - Greetings now use the shinychat welcome message API and disappear after the
-  first user message. They remain display only and are not sent to the model.
+  first user message. They remain display only and are not sent to the model (#21).
 - Use `shinychat::tool_result_display()` for tool results and present tense
   titles for running tools. The mtcars example uses the input toolbar to keep
-  its prompt buttons above the composer.
+  its prompt buttons above the composer (#21).
 
 ## Dependencies
 
