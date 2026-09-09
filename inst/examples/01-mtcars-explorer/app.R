@@ -77,13 +77,17 @@ ui <- page_sidebar(
         padding-bottom: 0.5rem;
       }
 
-      #chat .shiny-chat-input textarea {
+      #chat .shiny-chat-input .tiptap {
         --bs-border-radius: var(--bs-border-radius-sm, 0.25rem);
         scrollbar-width: none;
       }
 
-      #chat .shiny-chat-input textarea::-webkit-scrollbar {
+      #chat .shiny-chat-input .tiptap::-webkit-scrollbar {
         display: none;
+      }
+
+      #chat .shiny-chat-input:has(.shiny-chat-input-attachments) {
+        border-radius: var(--bs-border-radius-sm, 0.25rem);
       }
 
       .example-prompts {
