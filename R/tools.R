@@ -33,7 +33,7 @@ compile_component_tool <- function(component, engine, with_parent = FALSE) {
     description = component$description,
     arguments = arguments,
     annotations = ellmer::tool_annotations(
-      title = paste("Render", component$name)
+      title = paste("Rendering", component$name)
     )
   )
 }
@@ -80,7 +80,7 @@ builtin_tools <- function(engine) {
           )
         )
       ),
-      annotations = ellmer::tool_annotations(title = "Update component")
+      annotations = ellmer::tool_annotations(title = "Updating component")
     ),
     ellmer::tool(
       function(id = NULL) {
@@ -99,7 +99,7 @@ builtin_tools <- function(engine) {
           "The instance id to remove, as returned when it was created (for example \"c1\")."
         )
       ),
-      annotations = ellmer::tool_annotations(title = "Remove component")
+      annotations = ellmer::tool_annotations(title = "Removing component")
     ),
     ellmer::tool(
       function() {
@@ -111,7 +111,7 @@ builtin_tools <- function(engine) {
         "Use only when the user asks to start over or the whole view is being replaced."
       ),
       arguments = list(),
-      annotations = ellmer::tool_annotations(title = "Clear canvas")
+      annotations = ellmer::tool_annotations(title = "Clearing canvas")
     ),
     ellmer::tool(
       function() {
@@ -127,7 +127,7 @@ builtin_tools <- function(engine) {
       ),
       arguments = list(),
       annotations = ellmer::tool_annotations(
-        title = "Read canvas state",
+        title = "Reading canvas state",
         read_only_hint = TRUE
       )
     )

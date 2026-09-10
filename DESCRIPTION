@@ -1,6 +1,6 @@
 Package: shinygenui
 Title: Generative UI for 'shiny'
-Version: 0.1.0
+Version: 0.1.0.9000
 Authors@R: c(
     person("Nan", "Xiao", email = "me@nanx.me", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-0250-5673"))
@@ -26,11 +26,10 @@ Imports:
     ellmer (>= 0.4.1),
     htmltools,
     jsonlite,
-    promises,
     R6,
     rlang,
     shiny,
-    shinychat (>= 0.4.0),
+    shinychat (>= 0.5.0),
     stats,
     utils,
     whisker
