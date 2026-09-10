@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">shinygenui</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,6 +40,12 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="shinygenui-development-version">shinygenui (development version)<a class="anchor" aria-label="anchor" href="#shinygenui-development-version"></a></h2>
+<div class="section level3">
+<h3 id="chat-integration-development-version">Chat integration<a class="anchor" aria-label="anchor" href="#chat-integration-development-version"></a></h3>
+<ul><li>Require shinychat &gt;= 0.5.0 and delegate streaming, cancellation, and attachments to <code>chat_server()</code>. Conversation history stays disabled until it can restore the canvas and registry together. The package no longer directly imports {promises} (<a href="https://github.com/nanxstats/shinygenui/issues/21" class="external-link">#21</a>).</li>
+<li>Greetings now use the shinychat welcome message API and disappear after the first user message. They remain display only and are not sent to the model (<a href="https://github.com/nanxstats/shinygenui/issues/21" class="external-link">#21</a>).</li>
+<li>Use <code><a href="https://posit-dev.github.io/shinychat/r/reference/tool_result_display.html" class="external-link">shinychat::tool_result_display()</a></code> for tool results and present tense titles for running tools. The mtcars example uses the input toolbar to keep its prompt buttons above the composer (<a href="https://github.com/nanxstats/shinygenui/issues/21" class="external-link">#21</a>).</li>
+</ul></div>
 <div class="section level3">
 <h3 id="dependencies-development-version">Dependencies<a class="anchor" aria-label="anchor" href="#dependencies-development-version"></a></h3>
 <ul><li>Require ellmer &gt;= 0.4.1 for <code>stream_controller()</code>, which powers chat cancellation (<a href="https://github.com/nanxstats/shinygenui/issues/17" class="external-link">#17</a>).</li>

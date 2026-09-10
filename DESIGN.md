@@ -30,7 +30,8 @@ framework, and the usual ways of deploying a Shiny app.
 4.  **LLM support**: this layer turns the catalog into
     [`ellmer::tool()`](https://ellmer.tidyverse.org/reference/tool.html)
     objects, adds the tools supplied by shinygenui, builds the system
-    prompt with whisker, and runs the shinychat streaming loop.
+    prompt with whisker, and delegates the chat loop to
+    [`shinychat::chat_server()`](https://posit-dev.github.io/shinychat/r/reference/chat_app.html).
 
 Stateful objects, such as `GenuiRegistry`, use R6. Declarative values,
 such as components, catalogs, plans, and trace entries, are plain S3
@@ -39,7 +40,7 @@ follows the same broad division of responsibilities used in querychat.
 
 ## Data flow
 
-    user message → shinychat → chat$stream_async(stream = "content") [ExtendedTask]
+    user message → chat_server() → chat$stream_async(stream = "content") [ExtendedTask]
       → narrative text from model → chat_append() displays it
       → tool call from model (arguments already checked against the tool schema)
           → compiled tool function turns the arguments into a genui_call
@@ -162,12 +163,12 @@ provides reactive access to the trace.
   passes it explicitly to `insertUI()` and `removeUI()`. Component
   servers run inside `withReactiveDomain(session, ...)` so that
   `moduleServer()` binds to the correct session.
-- The streaming loop uses
-  [`shiny::ExtendedTask`](https://rdrr.io/pkg/shiny/man/ExtendedTask.html)
-  with `stream_async()` and `chat_append()`, so work in one session does
-  not block other sessions.
-  [`ellmer::stream_controller()`](https://ellmer.tidyverse.org/reference/stream_controller.html)
-  supports the cancel button and requires ellmer 0.4.1 or later.
+- [`shinychat::chat_server()`](https://posit-dev.github.io/shinychat/r/reference/chat_app.html)
+  owns the streaming loop. It uses
+  [`shiny::ExtendedTask`](https://rdrr.io/pkg/shiny/man/ExtendedTask.html),
+  `stream_async()`, and `chat_append()`, so work in one session does not
+  block other sessions. It handles cancellation, attachment input,
+  greetings, and stream errors.
 - `data` is a reactive passed to component servers. Code that runs
   during dispatch, such as `check()`, receives the current isolated
   value. This keeps the core independent of Shiny. Replay uses the same
@@ -176,12 +177,46 @@ provides reactive access to the trace.
   refers to the session that called the module because the app places
   `chat_ui()` next to
   [`genui_canvas()`](https://nanx.me/shinygenui/reference/genui_canvas.md).
+  The call to `chat_server()` supplies that parent session explicitly
+  and runs inside `withReactiveDomain(parent_session, ...)`: shinychat
+  also uses the ambient domain for observers and asynchronous appends.
   With `chat_id = NULL`, the app developer can provide a different chat
   loop. The registered tools still use the correct session because they
   close over it.
 - Every Shiny session must create its own ellmer `Chat`. Sharing a
   `Chat` between sessions would mix conversation history and tool
   functions from different users.
+
+### shinychat integration
+
+The package requires shinychat 0.5.0 and uses `chat_ui()` with
+`chat_server()`. There is one set of chat observers, owned by shinychat.
+
+- **Input and cancellation**: `chat_server()` enables the stop button
+  and attachments automatically unless the UI opts out.
+  Attachment-enabled submissions are lists of text and ellmer content
+  objects; shinychat splices these into the model call. Attachments are
+  model context and do not replace component `data`. Apps can disable
+  uploads with `chat_ui(allow_attachments = FALSE)` or restrict them
+  with a MIME allow-list.
+- **Greetings**: `genui_server(greeting = )` supplies a static welcome
+  message through shinychat’s greeting API. It is display-only and is
+  dismissed after the first user message, rather than becoming a
+  transcript entry. Empty greetings are omitted.
+- **Tool results**: `tool_result_display()` builds the display metadata
+  in the `extra` property of `ContentToolResult`. Tool-definition titles
+  describe work in progress; result titles describe the completed
+  operation. shinychat groups tool activity and shows these titles as
+  supplied.
+- **Example layout**: the mtcars example uses the `toolbar_input` slot,
+  ordering its prompts above the input. The manual browser test reads
+  `.shiny-chat-messages` inside the chat container.
+
+Conversation history is explicitly disabled with `history = FALSE`.
+Restoring or branching an ellmer conversation without restoring its
+canvas and registry would leave the model referring to missing or
+unrelated instance ids. Supporting history requires coordinating
+conversation changes with canvas trace replay.
 
 ## Confirmed scope
 

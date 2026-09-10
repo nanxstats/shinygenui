@@ -59,9 +59,9 @@ genui_server(
 
 - greeting:
 
-  Optional markdown string shown as the assistant's first message (only
-  used when `chat_id` is set). It is display-only and never sent to the
-  model.
+  Optional markdown welcome message, shown while the chat is empty and
+  dismissed after the first user message (only used when `chat_id` is
+  set). It is display-only and never sent to the model.
 
 - system_prompt:
 
@@ -79,15 +79,17 @@ and `instances` (the live instance state, a named list keyed by id).
 
 ## Details
 
-With `chat_id`, the package also runs the chat loop for a
+With `chat_id`, the package connects a
 [`shinychat::chat_ui()`](https://posit-dev.github.io/shinychat/r/reference/chat_ui.html)
-you placed in the UI: user input is streamed through
-`chat$stream_async()` inside a
-[shiny::ExtendedTask](https://rdrr.io/pkg/shiny/man/ExtendedTask.html)
-(so other sessions never block) and appended with
-[`shinychat::chat_append()`](https://posit-dev.github.io/shinychat/r/reference/chat_append.html),
-with cancel support. With `chat_id = NULL` you run your own loop on
-`chat`; the registered tools work all the same.
+you placed in the UI using
+[`shinychat::chat_server()`](https://posit-dev.github.io/shinychat/r/reference/chat_app.html).
+It handles asynchronous streaming, cancellation, and attachments. Set
+`allow_attachments = FALSE` in `chat_ui()` to disable uploads;
+attachments provide context to the model and do not replace the
+component `data`. Conversation history is disabled because restoring a
+conversation also requires restoring its canvas and registry. With
+`chat_id = NULL` you run your own loop on `chat`; the registered tools
+work all the same.
 
 Create the `Chat` object inside your server function, one per session.
 Sharing a single `Chat` across sessions would cross-wire the tool

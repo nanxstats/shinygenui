@@ -27,7 +27,7 @@ crash the session."><meta property="og:image" content="https://nanx.me/shinygenu
 
     <a class="navbar-brand me-2" href="../index.html">shinygenui</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -107,9 +107,9 @@ the chat loop yourself.</p></dd>
 
 
 <dt id="arg-greeting">greeting<a class="anchor" aria-label="anchor" href="#arg-greeting"></a></dt>
-<dd><p>Optional markdown string shown as the assistant's first
-message (only used when <code>chat_id</code> is set). It is display-only and never
-sent to the model.</p></dd>
+<dd><p>Optional markdown welcome message, shown while the chat
+is empty and dismissed after the first user message (only used when
+<code>chat_id</code> is set). It is display-only and never sent to the model.</p></dd>
 
 
 <dt id="arg-system-prompt">system_prompt<a class="anchor" aria-label="anchor" href="#arg-system-prompt"></a></dt>
@@ -125,11 +125,13 @@ reactives <code>trace</code> (the ordered call trace, see <code><a href="genui_t
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>With <code>chat_id</code>, the package also runs the chat loop for a
-<code><a href="https://posit-dev.github.io/shinychat/r/reference/chat_ui.html" class="external-link">shinychat::chat_ui()</a></code> you placed in the UI: user input is streamed
-through <code>chat$stream_async()</code> inside a <a href="https://rdrr.io/pkg/shiny/man/ExtendedTask.html" class="external-link">shiny::ExtendedTask</a> (so other
-sessions never block) and appended with <code><a href="https://posit-dev.github.io/shinychat/r/reference/chat_append.html" class="external-link">shinychat::chat_append()</a></code>,
-with cancel support. With <code>chat_id = NULL</code> you run your own loop on
+    <p>With <code>chat_id</code>, the package connects a <code><a href="https://posit-dev.github.io/shinychat/r/reference/chat_ui.html" class="external-link">shinychat::chat_ui()</a></code> you placed
+in the UI using <code><a href="https://posit-dev.github.io/shinychat/r/reference/chat_app.html" class="external-link">shinychat::chat_server()</a></code>. It handles asynchronous
+streaming, cancellation, and attachments. Set <code>allow_attachments = FALSE</code>
+in <code>chat_ui()</code> to disable uploads; attachments provide context to the
+model and do not replace the component <code>data</code>. Conversation history is
+disabled because restoring a conversation also requires restoring its
+canvas and registry. With <code>chat_id = NULL</code> you run your own loop on
 <code>chat</code>; the registered tools work all the same.</p>
 <p>Create the <code>Chat</code> object inside your server function, one per session.
 Sharing a single <code>Chat</code> across sessions would cross-wire the tool
