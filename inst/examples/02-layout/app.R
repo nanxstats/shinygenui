@@ -36,6 +36,17 @@ library(bslib)
 library(shinygenui)
 
 ui <- page_sidebar(
+  tags$head(
+    tags$style(HTML("
+      #chat .shiny-chat-input .tiptap {
+        --bs-border-radius: var(--bs-border-radius-sm, 0.25rem);
+      }
+
+      #chat .shiny-chat-input:has(.shiny-chat-input-attachments) {
+        border-radius: var(--bs-border-radius-sm, 0.25rem);
+      }
+    "))
+  ),
   title = "Layout and replay",
   sidebar = sidebar(
     width = 380,
