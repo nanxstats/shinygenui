@@ -29,7 +29,9 @@
 ### Branding
 
 - Add a hex sticker logo with a p5.brush watercolor polygon background
-  ([\#14](https://github.com/nanxstats/shinygenui/issues/14)).
+  ([\#14](https://github.com/nanxstats/shinygenui/issues/14),
+  [\#15](https://github.com/nanxstats/shinygenui/issues/15),
+  [\#24](https://github.com/nanxstats/shinygenui/issues/24)).
 
 ### Examples
 
