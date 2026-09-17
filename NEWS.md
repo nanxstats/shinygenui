@@ -18,7 +18,7 @@
 
 ## Branding
 
-- Add a hex sticker logo with a p5.brush watercolor polygon background (#14).
+- Add a hex sticker logo with a p5.brush watercolor polygon background (#14, #15, #24).
 
 ## Examples
 
