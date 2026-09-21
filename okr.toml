@@ -1,6 +1,6 @@
 [project]
 r-version = "4.6.1"
-snapshot = "2026-09-14"
+snapshot = "2026-09-21"
 strict = false
 
 [vendor]
