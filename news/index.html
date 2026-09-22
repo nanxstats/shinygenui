@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">shinygenui</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,30 +39,26 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="shinygenui-development-version">shinygenui (development version)<a class="anchor" aria-label="anchor" href="#shinygenui-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.2.0" id="shinygenui-020">shinygenui 0.2.0<a class="anchor" aria-label="anchor" href="#shinygenui-020"></a></h2>
 <div class="section level3">
-<h3 id="chat-integration-development-version">Chat integration<a class="anchor" aria-label="anchor" href="#chat-integration-development-version"></a></h3>
-<ul><li>Require shinychat &gt;= 0.5.0 and delegate streaming, cancellation, and attachments to <code>chat_server()</code>. Conversation history stays disabled until it can restore the canvas and registry together. The package no longer directly imports {promises} (<a href="https://github.com/nanxstats/shinygenui/issues/21" class="external-link">#21</a>).</li>
+<h3 id="chat-integration-0-2-0">Chat integration<a class="anchor" aria-label="anchor" href="#chat-integration-0-2-0"></a></h3>
+<ul><li>Require shinychat &gt;= 0.5.0 and ellmer &gt;= 0.4.1. Streaming, cancellation, and attachments are now delegated to <code><a href="https://posit-dev.github.io/shinychat/r/reference/chat_app.html" class="external-link">shinychat::chat_server()</a></code>, which relies on ellmer’s stream controller. Conversation history stays disabled until it can restore the canvas and registry together. The package no longer imports {promises} directly (<a href="https://github.com/nanxstats/shinygenui/issues/17" class="external-link">#17</a>, <a href="https://github.com/nanxstats/shinygenui/issues/21" class="external-link">#21</a>).</li>
 <li>Greetings now use the shinychat welcome message API and disappear after the first user message. They remain display only and are not sent to the model (<a href="https://github.com/nanxstats/shinygenui/issues/21" class="external-link">#21</a>).</li>
 <li>Use <code><a href="https://posit-dev.github.io/shinychat/r/reference/tool_result_display.html" class="external-link">shinychat::tool_result_display()</a></code> for tool results and present tense titles for running tools. The mtcars example uses the input toolbar to keep its prompt buttons above the composer (<a href="https://github.com/nanxstats/shinygenui/issues/21" class="external-link">#21</a>).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="dependencies-development-version">Dependencies<a class="anchor" aria-label="anchor" href="#dependencies-development-version"></a></h3>
-<ul><li>Require ellmer &gt;= 0.4.1 for <code>stream_controller()</code>, which powers chat cancellation (<a href="https://github.com/nanxstats/shinygenui/issues/17" class="external-link">#17</a>).</li>
-</ul></div>
-<div class="section level3">
-<h3 id="branding-development-version">Branding<a class="anchor" aria-label="anchor" href="#branding-development-version"></a></h3>
-<ul><li>Add a hex sticker logo with a p5.brush watercolor polygon background (<a href="https://github.com/nanxstats/shinygenui/issues/14" class="external-link">#14</a>, <a href="https://github.com/nanxstats/shinygenui/issues/15" class="external-link">#15</a>, <a href="https://github.com/nanxstats/shinygenui/issues/24" class="external-link">#24</a>).</li>
-</ul></div>
-<div class="section level3">
-<h3 id="examples-development-version">Examples<a class="anchor" aria-label="anchor" href="#examples-development-version"></a></h3>
+<h3 id="examples-0-2-0">Examples<a class="anchor" aria-label="anchor" href="#examples-0-2-0"></a></h3>
 <ul><li>Example and acceptance test apps now read their model and reasoning effort from the required <code>SHINYGENUI_MODEL</code> and <code>SHINYGENUI_EFFORT</code> environment variables instead of relying on defaults (<a href="https://github.com/nanxstats/shinygenui/issues/9" class="external-link">#9</a>).</li>
 <li>The <code>01-mtcars-explorer</code> example now offers prompt buttons above the chat composer. A click fills and focuses the composer without submitting (<a href="https://github.com/nanxstats/shinygenui/issues/10" class="external-link">#10</a>).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="documentation-development-version">Documentation<a class="anchor" aria-label="anchor" href="#documentation-development-version"></a></h3>
+<h3 id="documentation-0-2-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-2-0"></a></h3>
 <ul><li>The README now includes a recording of the mtcars explorer example (<a href="https://github.com/nanxstats/shinygenui/issues/11" class="external-link">#11</a>).</li>
 <li>Code examples now consistently use the same model provider while continuing to support any ellmer provider (<a href="https://github.com/nanxstats/shinygenui/issues/8" class="external-link">#8</a>).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="branding-0-2-0">Branding<a class="anchor" aria-label="anchor" href="#branding-0-2-0"></a></h3>
+<ul><li>Add a hex sticker logo with a p5.brush watercolor polygon background (<a href="https://github.com/nanxstats/shinygenui/issues/14" class="external-link">#14</a>, <a href="https://github.com/nanxstats/shinygenui/issues/15" class="external-link">#15</a>, <a href="https://github.com/nanxstats/shinygenui/issues/24" class="external-link">#24</a>).</li>
 </ul></div>
 </div>
     <div class="section level2">

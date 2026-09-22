@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="index.html">shinygenui</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -112,7 +112,7 @@
 <li>Every Shiny session must create its own ellmer <code>Chat</code>. Sharing a <code>Chat</code> between sessions would mix conversation history and tool functions from different users.</li>
 </ul><div class="section level3">
 <h3 id="shinychat-integration">shinychat integration<a class="anchor" aria-label="anchor" href="#shinychat-integration"></a></h3>
-<p>The package requires shinychat 0.5.0 and uses <code>chat_ui()</code> with <code>chat_server()</code>. There is one set of chat observers, owned by shinychat.</p>
+<p>The package requires shinychat &gt;= 0.5.0 and uses <code>chat_ui()</code> with <code>chat_server()</code>. There is one set of chat observers, owned by shinychat.</p>
 <ul><li>
 <strong>Input and cancellation</strong>: <code>chat_server()</code> enables the stop button and attachments automatically unless the UI opts out. Attachment-enabled submissions are lists of text and ellmer content objects; shinychat splices these into the model call. Attachments are model context and do not replace component <code>data</code>. Apps can disable uploads with <code>chat_ui(allow_attachments = FALSE)</code> or restrict them with a MIME allow-list.</li>
 <li>

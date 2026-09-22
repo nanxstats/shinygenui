@@ -1,14 +1,17 @@
 # Changelog
 
-## shinygenui (development version)
+## shinygenui 0.2.0
 
 ### Chat integration
 
-- Require shinychat \>= 0.5.0 and delegate streaming, cancellation, and
-  attachments to `chat_server()`. Conversation history stays disabled
-  until it can restore the canvas and registry together. The package no
-  longer directly imports {promises}
-  ([\#21](https://github.com/nanxstats/shinygenui/issues/21)).
+- Require shinychat \>= 0.5.0 and ellmer \>= 0.4.1. Streaming,
+  cancellation, and attachments are now delegated to
+  [`shinychat::chat_server()`](https://posit-dev.github.io/shinychat/r/reference/chat_app.html),
+  which relies on ellmer’s stream controller. Conversation history stays
+  disabled until it can restore the canvas and registry together. The
+  package no longer imports {promises} directly
+  ([\#17](https://github.com/nanxstats/shinygenui/issues/17),
+  [\#21](https://github.com/nanxstats/shinygenui/issues/21)).
 - Greetings now use the shinychat welcome message API and disappear
   after the first user message. They remain display only and are not
   sent to the model
@@ -19,19 +22,6 @@
   mtcars example uses the input toolbar to keep its prompt buttons above
   the composer
   ([\#21](https://github.com/nanxstats/shinygenui/issues/21)).
-
-### Dependencies
-
-- Require ellmer \>= 0.4.1 for `stream_controller()`, which powers chat
-  cancellation
-  ([\#17](https://github.com/nanxstats/shinygenui/issues/17)).
-
-### Branding
-
-- Add a hex sticker logo with a p5.brush watercolor polygon background
-  ([\#14](https://github.com/nanxstats/shinygenui/issues/14),
-  [\#15](https://github.com/nanxstats/shinygenui/issues/15),
-  [\#24](https://github.com/nanxstats/shinygenui/issues/24)).
 
 ### Examples
 
@@ -51,6 +41,13 @@
 - Code examples now consistently use the same model provider while
   continuing to support any ellmer provider
   ([\#8](https://github.com/nanxstats/shinygenui/issues/8)).
+
+### Branding
+
+- Add a hex sticker logo with a p5.brush watercolor polygon background
+  ([\#14](https://github.com/nanxstats/shinygenui/issues/14),
+  [\#15](https://github.com/nanxstats/shinygenui/issues/15),
+  [\#24](https://github.com/nanxstats/shinygenui/issues/24)).
 
 ## shinygenui 0.1.0
 
