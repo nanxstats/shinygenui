@@ -2,6 +2,8 @@
 
 ## shinygenui 0.2.0
 
+CRAN release: 2026-09-22
+
 ### Chat integration
 
 - Require shinychat \>= 0.5.0 and ellmer \>= 0.4.1. Streaming,
