@@ -164,7 +164,7 @@ the rebuilt components have the same ids. Shiny inputs return to their default v
 
 ### shinychat integration
 
-The package requires shinychat 0.5.0 and uses `chat_ui()` with
+The package requires shinychat >= 0.5.0 and uses `chat_ui()` with
 `chat_server()`. There is one set of chat observers, owned by shinychat.
 
 - **Input and cancellation**: `chat_server()` enables the stop button and
