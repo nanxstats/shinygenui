@@ -1,24 +1,17 @@
-# shinygenui (development version)
+# shinygenui 0.2.0
 
 ## Chat integration
 
-- Require shinychat >= 0.5.0 and delegate streaming, cancellation, and
-  attachments to `chat_server()`. Conversation history stays disabled until
-  it can restore the canvas and registry together. The package no longer
-  directly imports {promises} (#21).
+- Require shinychat >= 0.5.0 and ellmer >= 0.4.1. Streaming, cancellation,
+  and attachments are now delegated to `shinychat::chat_server()`,
+  which relies on ellmer's stream controller. Conversation history stays
+  disabled until it can restore the canvas and registry together.
+  The package no longer imports {promises} directly (#17, #21).
 - Greetings now use the shinychat welcome message API and disappear after the
   first user message. They remain display only and are not sent to the model (#21).
 - Use `shinychat::tool_result_display()` for tool results and present tense
   titles for running tools. The mtcars example uses the input toolbar to keep
   its prompt buttons above the composer (#21).
-
-## Dependencies
-
-- Require ellmer >= 0.4.1 for `stream_controller()`, which powers chat cancellation (#17).
-
-## Branding
-
-- Add a hex sticker logo with a p5.brush watercolor polygon background (#14, #15, #24).
 
 ## Examples
 
@@ -33,6 +26,10 @@
 - The README now includes a recording of the mtcars explorer example (#11).
 - Code examples now consistently use the same model provider while continuing
   to support any ellmer provider (#8).
+
+## Branding
+
+- Add a hex sticker logo with a p5.brush watercolor polygon background (#14, #15, #24).
 
 # shinygenui 0.1.0
 
