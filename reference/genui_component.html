@@ -25,7 +25,7 @@ the declared types; it never emits code."><meta property="og:image" content="htt
 
     <a class="navbar-brand me-2" href="../index.html">shinygenui</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -106,7 +106,7 @@ column names of the active dataset.</p></dd>
 <dd><p><code>function(id, args)</code> returning an <code><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">htmltools::tag()</a></code> (or tag
 list). <code>id</code> is the fully namespaced module id for this instance; use
 <code>shiny::NS(id)</code> to namespace any embedded inputs and outputs. <code>args</code> is
-the validated argument list.</p></dd>
+the validated argument list; see the "Argument values" section.</p></dd>
 
 
 <dt id="arg-server">server<a class="anchor" aria-label="anchor" href="#arg-server"></a></dt>
@@ -122,7 +122,7 @@ the hook for cross-component reactivity in a later release.</p></dd>
 
 <dt id="arg-check">check<a class="anchor" aria-label="anchor" href="#arg-check"></a></dt>
 <dd><p>Optional <code>function(args, data)</code> for semantic validation
-beyond the JSON schema. Return <code>NULL</code> when <code>args</code> are acceptable, or a
+beyond the declared types. Return <code>NULL</code> when <code>args</code> are acceptable, or a
 string describing the problem; the string is returned to the model as a
 tool error so it can self-correct.</p></dd>
 
@@ -141,6 +141,19 @@ components may target it by passing the instance's id as <code>parent_id</code>.
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>genui_component</code> object.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="argument-values">Argument values<a class="anchor" aria-label="anchor" href="#argument-values"></a></h2>
+
+
+<p><code>ui</code>, <code>server</code>, and <code>check</code> receive <code>args</code> in the same form whether the
+call came from the model, from <code>update_component</code>, or from
+<code><a href="genui_replay.html">genui_replay()</a></code>:</p><ul><li><p>A string, enum, boolean, integer, or number is a length-one vector.</p></li>
+<li><p>An array of those is an atomic vector, which may be empty.</p></li>
+<li><p>An array of objects or of arrays is an unnamed list.</p></li>
+<li><p>An object is a named list that holds only the fields supplied.</p></li>
+</ul><p>An optional argument that the model omitted or set to null is absent from
+<code>args</code>, so test for it with <code><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null()</a></code>.</p>
     </div>
 
     <div class="section level2">

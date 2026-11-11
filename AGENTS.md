@@ -38,6 +38,12 @@ changes.
   [`genui_dispatch()`](https://nanx.me/shinygenui/reference/genui_dispatch.md)
   function validates them before anything is rendered and does not
   depend on Shiny or an LLM.
+- Every tool is registered with `convert = FALSE`, so
+  [`genui_dispatch()`](https://nanx.me/shinygenui/reference/genui_dispatch.md)
+  receives the model’s arguments as parsed from JSON. It is the only
+  place that validates them and the only place that decides their R
+  form. Do not rely on the provider to enforce the tool schema: only
+  strict mode providers such as `chat_openai()` do.
 - Every call to `insertUI()` or `removeUI()` supplies `session =`
   explicitly. Component servers run under
   `shiny::withReactiveDomain(session, ...)`. Tools run inside ellmer’s
@@ -84,6 +90,13 @@ changes.
   [`rlang::new_function()`](https://rlang.r-lib.org/reference/new_function.html)
   and
   [`rlang::pairlist2()`](https://rlang.r-lib.org/reference/pairlist2.html).
+- ellmer’s default `convert = TRUE` reshapes tool arguments before the
+  tool function runs: an array of enums becomes a factor, an array of
+  objects a tibble, and a missing required scalar `NA`. Calling a tool
+  function directly in a test skips that step, which once hid a bug. The
+  tools now set `convert = FALSE`. To mimic a real call in a test, use
+  `do.call(tool, json_args('{...}'))` from `tests/testthat/helper.R`,
+  which passes arrays as unnamed lists and `null` as `NULL`.
 - `chat_openai(api_key = )` is deprecated; use
   `credentials = function() list(api_key = ...)` in tests.
 - [`shiny::MockShinySession`](https://rdrr.io/pkg/shiny/man/MockShinySession.html)

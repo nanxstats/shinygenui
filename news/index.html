@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">shinygenui</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,21 @@
       <small>Source: <a href="https://github.com/nanxstats/shinygenui/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="shinygenui-development-version">shinygenui (development version)<a class="anchor" aria-label="anchor" href="#shinygenui-development-version"></a></h2>
+<div class="section level3">
+<h3 id="tool-arguments-development-version">Tool arguments<a class="anchor" aria-label="anchor" href="#tool-arguments-development-version"></a></h3>
+<ul><li>Tools now set <code>convert = FALSE</code>, so ellmer passes the model’s JSON arguments to <code><a href="../reference/genui_dispatch.html">genui_dispatch()</a></code> unchanged. ellmer used to convert them first, and dispatch then rejected valid calls: an array of enums arrived as a factor and an array of objects as a data frame. In particular, a <code>data_table</code> call that named its columns always failed (<a href="https://github.com/nanxstats/shinygenui/issues/29" class="external-link">#29</a>).</li>
+<li>Components now receive arguments in one documented form however the call was made: an array of strings, numbers, or other single values is an atomic vector, any other array is an unnamed list, and an object is a named list without <code>NULL</code> fields. See the “Argument values” section of <code><a href="../reference/genui_component.html">?genui_component</a></code> (<a href="https://github.com/nanxstats/shinygenui/issues/29" class="external-link">#29</a>).</li>
+<li>
+<code>update_component</code> now replaces each supplied argument as a whole. An array of objects can be updated, where before the update was rejected or, in a replay, ignored. A supplied object replaces the previous one instead of being merged with it field by field (<a href="https://github.com/nanxstats/shinygenui/issues/29" class="external-link">#29</a>).</li>
+<li>A required argument that the model omits is now reported as missing instead of as an invalid <code>NA</code>. Errors quote a rejected value as JSON, so arrays, objects, and nulls remain recognizable to the model (<a href="https://github.com/nanxstats/shinygenui/issues/29" class="external-link">#29</a>).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="dependencies-development-version">Dependencies<a class="anchor" aria-label="anchor" href="#dependencies-development-version"></a></h3>
+<ul><li>Tested with ellmer 0.5.2. The ellmer requirement remains &gt;= 0.4.1. Since ellmer 0.5.1, <code>chat_openai_compatible()</code> and most providers built on it no longer use strict tool schemas, so the model can omit required arguments or send values outside an enum. shinygenui validates every call itself and returns such mistakes to the model as tool errors (<a href="https://github.com/nanxstats/shinygenui/issues/29" class="external-link">#29</a>).</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="shinygenui-020">shinygenui 0.2.0<a class="anchor" aria-label="anchor" href="#shinygenui-020"></a></h2><p class="text-muted">CRAN release: 2026-09-22</p>
 <div class="section level3">

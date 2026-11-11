@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="index.html">shinygenui</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,6 +51,7 @@
 <div class="section level2">
 <h2 id="architecture-invariants-do-not-break">Architecture invariants (do not break)<a class="anchor" aria-label="anchor" href="#architecture-invariants-do-not-break"></a></h2>
 <ul><li>The model never emits code, and the package never calls <code><a href="https://rdrr.io/r/base/eval.html" class="external-link">eval()</a></code> or <code><a href="https://rdrr.io/r/base/parse.html" class="external-link">parse()</a></code> on model output. Tool arguments are plain data. The pure <code><a href="reference/genui_dispatch.html">genui_dispatch()</a></code> function validates them before anything is rendered and does not depend on Shiny or an LLM.</li>
+<li>Every tool is registered with <code>convert = FALSE</code>, so <code><a href="reference/genui_dispatch.html">genui_dispatch()</a></code> receives the model’s arguments as parsed from JSON. It is the only place that validates them and the only place that decides their R form. Do not rely on the provider to enforce the tool schema: only strict mode providers such as <code>chat_openai()</code> do.</li>
 <li>Every call to <code>insertUI()</code> or <code>removeUI()</code> supplies <code>session =</code> explicitly. Component servers run under <code>shiny::withReactiveDomain(session, ...)</code>. Tools run inside ellmer’s asynchronous promise chains, where the current reactive domain is not reliable.</li>
 <li>Instance ids (<code>c1</code>, <code>c2</code>, …) are assigned deterministically and never reused. Trace entries are plain lists that can be encoded as JSON. Values from Shiny inputs are deliberately not recorded, so replay restores their defaults.</li>
 <li>
@@ -66,6 +67,7 @@
 <code><a href="https://r6.r-lib.org/reference/R6Class.html" class="external-link">R6::R6Class</a></code> requires names to be unique across <code>public</code>, <code>private</code>, and <code>active</code>.</li>
 <li>whisker treats <code>""</code> as truthy; pass <code>NULL</code> to suppress a template section.</li>
 <li>ellmer types are S7: class vectors look like <code>c("ellmer::TypeEnum", "ellmer::Type", "S7_object")</code>. Read properties with <code>attr(x, "values", exact = TRUE)</code> and related calls. <code><a href="https://ellmer.tidyverse.org/reference/tool.html" class="external-link">ellmer::tool()</a></code> requires the function’s formals to exactly match the declared <code>arguments</code>. Generate formals with <code><a href="https://rlang.r-lib.org/reference/new_function.html" class="external-link">rlang::new_function()</a></code> and <code><a href="https://rlang.r-lib.org/reference/pairlist2.html" class="external-link">rlang::pairlist2()</a></code>.</li>
+<li>ellmer’s default <code>convert = TRUE</code> reshapes tool arguments before the tool function runs: an array of enums becomes a factor, an array of objects a tibble, and a missing required scalar <code>NA</code>. Calling a tool function directly in a test skips that step, which once hid a bug. The tools now set <code>convert = FALSE</code>. To mimic a real call in a test, use <code>do.call(tool, json_args('{...}'))</code> from <code>tests/testthat/helper.R</code>, which passes arrays as unnamed lists and <code>null</code> as <code>NULL</code>.</li>
 <li>
 <code>chat_openai(api_key = )</code> is deprecated; use <code>credentials = function() list(api_key = ...)</code> in tests.</li>
 <li>

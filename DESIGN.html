@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="index.html">shinygenui</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,7 +57,7 @@
 <h2 id="data-flow">Data flow<a class="anchor" aria-label="anchor" href="#data-flow"></a></h2>
 <pre><code>user message → chat_server() → chat$stream_async(stream = "content") [ExtendedTask]
   → narrative text from model → chat_append() displays it
-  → tool call from model (arguments already checked against the tool schema)
+  → tool call from model (JSON arguments, parsed by ellmer but not converted)
       → compiled tool function turns the arguments into a genui_call
           → genui_dispatch(catalog, call, state)
               checks the component, ids, argument types, and check() result
@@ -77,7 +77,7 @@
 <ul><li>
 <strong>Create</strong>: dispatch assigns the next id. The executor inserts the shell in the canvas, or in a container when <code>parent_id</code> is supplied, and then runs <code>server(id, args, data)</code> in the module session.</li>
 <li>
-<strong>Update</strong>: <code>update_component(id, args)</code> uses <code><a href="https://rdrr.io/r/utils/modifyList.html" class="external-link">modifyList()</a></code> to combine the supplied arguments with the current arguments, then validates the result. The executor destroys the instance’s observers, removes the contents of the shell, and creates its UI and server again. The shell and its position do not change. In version 0.1, Shiny inputs return to their defaults after an update because the module starts again. Preserving those values is future work.</li>
+<strong>Update</strong>: <code>update_component(id, args)</code> replaces each supplied argument in the current arguments, then validates the result. A supplied value replaces the stored value as a whole, including arrays and objects, and <code>null</code> removes the argument. The executor destroys the instance’s observers, removes the contents of the shell, and creates its UI and server again. The shell and its position do not change. In version 0.1, Shiny inputs return to their defaults after an update because the module starts again. Preserving those values is future work.</li>
 <li>
 <strong>Remove and clear</strong>: the executor destroys observers and then removes the relevant shells. For a container, it removes children before their parent.</li>
 </ul><div class="section level3">
@@ -90,13 +90,24 @@
 <div class="section level2">
 <h2 id="tools-and-schemas">Tools and schemas<a class="anchor" aria-label="anchor" href="#tools-and-schemas"></a></h2>
 <p>Each catalog entry becomes an <code><a href="https://ellmer.tidyverse.org/reference/tool.html" class="external-link">ellmer::tool()</a></code>. shinygenui generates the function formals from the component’s argument names because ellmer requires the formals and declared arguments to match exactly.</p>
-<p>An app can build its catalog inside the server function. Argument types can therefore use values that are known in the current session. For example, a <code>type_enum</code> can contain the column names of the current dataset. If the model invents a column, the tool schema rejects it.</p>
-<p>shinygenui also supplies <code>update_component</code>, <code>remove_component</code>, <code>clear_canvas</code>, and <code>get_canvas_state</code>. ellmer cannot express an update schema that varies with the selected component, so <code>update_component</code> accepts <code>args</code> as a string containing a JSON object. jsonlite parses that string as data. <code><a href="reference/genui_dispatch.html">genui_dispatch()</a></code> then validates the result against the types declared by the component, including scalar types, array types, and enum values. These are the same checks used for creation, but they happen in dispatch rather than at the provider.</p>
+<p>An app can build its catalog inside the server function. Argument types can therefore use values that are known in the current session. For example, a <code>type_enum</code> can contain the column names of the current dataset. If the model invents a column, dispatch rejects it.</p>
+<p>shinygenui also supplies <code>update_component</code>, <code>remove_component</code>, <code>clear_canvas</code>, and <code>get_canvas_state</code>. ellmer cannot express an update schema that varies with the selected component, so <code>update_component</code> accepts <code>args</code> as a string containing a JSON object. jsonlite parses that string as data. <code><a href="reference/genui_dispatch.html">genui_dispatch()</a></code> then validates the result against the types declared by the component, including scalar types, array types, and enum values. These are the same checks used for creation.</p>
 <p>The argument name <code>id</code> is reserved. <code>parent_id</code> is also reserved and is added automatically when a catalog contains a container.</p>
+<div class="section level3">
+<h3 id="argument-validation">Argument validation<a class="anchor" aria-label="anchor" href="#argument-validation"></a></h3>
+<p>The schema sent to the provider guides the model but does not guarantee what comes back. Some providers, such as <code>chat_openai()</code>, use OpenAI’s strict mode, which constrains the model’s output to the schema. The others send standard JSON Schema, which a model may not follow. Since ellmer 0.5.1 that group includes <code>chat_openai_compatible()</code> and most providers built on it. A model can then omit a required argument, invent an enum value, or send the wrong type. <code><a href="reference/genui_dispatch.html">genui_dispatch()</a></code> is therefore the only validation shinygenui relies on, and it checks every call from every provider.</p>
+<p>Every tool is registered with <code>convert = FALSE</code>. ellmer then calls the tool function with the arguments as parsed from JSON: arrays are unnamed lists, objects are named lists, and <code>null</code> is <code>NULL</code>. With ellmer’s default <code>convert = TRUE</code>, the arguments would be reshaped for ordinary R functions before dispatch could see them. An array of enums would become a factor, an array of objects a data frame, and a missing required argument <code>NA</code>. Dispatch would reject those forms or report the wrong problem.</p>
+<p>Dispatch validates each value and returns it in one canonical form, which is what components, the registry, and the trace hold:</p>
+<ul><li>A string, enum, boolean, integer, or number is a length-one vector.</li>
+<li>An array of those is an atomic vector, which may be empty.</li>
+<li>Any other array is an unnamed list of canonical items.</li>
+<li>An object is a named list of canonical fields. Fields that are <code>null</code> are dropped, as <code>null</code> arguments are.</li>
+</ul><p>Dispatch accepts the canonical form as well as the parsed JSON form, so validating a canonical value returns it unchanged. Creation, update, replay, and calls written by hand in R all pass through this one step. As ellmer’s conversion does, dispatch unwraps a scalar that a model wrapped in an array with one element.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="trace-and-replay">Trace and replay<a class="anchor" aria-label="anchor" href="#trace-and-replay"></a></h2>
-<p>Every successful call adds <code>list(op, id, component, args)</code> to an ordered trace. Trace entries contain only values that can be encoded as JSON. They do not contain environments or values from embedded Shiny inputs.</p>
+<p>Every successful call adds <code>list(op, id, component, args)</code> to an ordered trace. Trace entries contain only values that can be encoded as JSON. They do not contain environments or values from embedded Shiny inputs. Arguments are recorded in canonical form. A trace that was written to JSON and read back holds arrays as lists, and it replays to the same canvas because dispatch normalizes them again.</p>
 <p>Replay starts with a fresh registry, then passes each trace entry through the same dispatch and execution code used for model calls. <code>genui_replay(trace, catalog, target)</code> can therefore rebuild the canvas without an LLM. Because replay uses the same id assignment and ids are never reused, the rebuilt components have the same ids. Shiny inputs return to their default values.</p>
 <p><code><a href="reference/genui_trace.html">genui_trace()</a></code> provides reactive access to the trace.</p>
 </div>
@@ -135,8 +146,7 @@
 <div class="section level2">
 <h2 id="open-questions">Open questions<a class="anchor" aria-label="anchor" href="#open-questions"></a></h2>
 <ul><li>If catalogs grow, should each component get its own update tool, such as <code>update_&lt;name&gt;</code>? This would let the provider validate the full update schema but would add one tool for every component. Version 0.1 uses one <code>update_component</code> tool and validates its arguments in dispatch.</li>
-<li>
-<code><a href="https://rdrr.io/r/utils/modifyList.html" class="external-link">modifyList()</a></code> drops a key when its JSON value is <code>null</code>. This currently resets that argument to its default. Is that the behavior we want to promise?</li>
+<li>An update drops an argument when its JSON value is <code>null</code>. This currently resets that argument to its default. Is that the behavior we want to promise?</li>
 <li>Version 0.1 uses a responsive CSS grid and allows each component to suggest a <code>width</code>. A later version might let the model choose column spans or use a more capable layout system.</li>
 <li>The design assumes one stream in progress for each session. shinychat prevents another input in normal use, but the package does not prevent an app developer from starting two streams whose tool calls interleave.</li>
 </ul></div>

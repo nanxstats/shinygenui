@@ -6,19 +6,19 @@
     }
   };
 </script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Server logic for a generative UI canvas — genui_server"><meta name="description" content="Wires a genui_catalog() to an ellmer Chat: compiles every component
-into a schema-validated tool, registers the built-in lifecycle tools
-(update_component, remove_component, clear_canvas), installs the
-assembled system prompt, and executes validated tool calls against the
-genui_canvas() with the matching id. Components stream onto the
-canvas progressively as the model emits tool calls; validation and
-rendering failures are returned to the model as tool errors and never
+into a tool with a typed argument schema, registers the built-in
+lifecycle tools (update_component, remove_component, clear_canvas),
+installs the assembled system prompt, and executes validated tool calls
+against the genui_canvas() with the matching id. Components stream
+onto the canvas progressively as the model emits tool calls; validation
+and rendering failures are returned to the model as tool errors and never
 crash the session."><meta property="og:description" content="Wires a genui_catalog() to an ellmer Chat: compiles every component
-into a schema-validated tool, registers the built-in lifecycle tools
-(update_component, remove_component, clear_canvas), installs the
-assembled system prompt, and executes validated tool calls against the
-genui_canvas() with the matching id. Components stream onto the
-canvas progressively as the model emits tool calls; validation and
-rendering failures are returned to the model as tool errors and never
+into a tool with a typed argument schema, registers the built-in
+lifecycle tools (update_component, remove_component, clear_canvas),
+installs the assembled system prompt, and executes validated tool calls
+against the genui_canvas() with the matching id. Components stream
+onto the canvas progressively as the model emits tool calls; validation
+and rendering failures are returned to the model as tool errors and never
 crash the session."><meta property="og:image" content="https://nanx.me/shinygenui/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
@@ -27,7 +27,7 @@ crash the session."><meta property="og:image" content="https://nanx.me/shinygenu
 
     <a class="navbar-brand me-2" href="../index.html">shinygenui</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,12 +55,12 @@ crash the session."><meta property="og:image" content="https://nanx.me/shinygenu
 
     <div class="ref-description section level2">
     <p>Wires a <code><a href="genui_catalog.html">genui_catalog()</a></code> to an ellmer <code>Chat</code>: compiles every component
-into a schema-validated tool, registers the built-in lifecycle tools
-(<code>update_component</code>, <code>remove_component</code>, <code>clear_canvas</code>), installs the
-assembled system prompt, and executes validated tool calls against the
-<code><a href="genui_canvas.html">genui_canvas()</a></code> with the matching <code>id</code>. Components stream onto the
-canvas progressively as the model emits tool calls; validation and
-rendering failures are returned to the model as tool errors and never
+into a tool with a typed argument schema, registers the built-in
+lifecycle tools (<code>update_component</code>, <code>remove_component</code>, <code>clear_canvas</code>),
+installs the assembled system prompt, and executes validated tool calls
+against the <code><a href="genui_canvas.html">genui_canvas()</a></code> with the matching <code>id</code>. Components stream
+onto the canvas progressively as the model emits tool calls; validation
+and rendering failures are returned to the model as tool errors and never
 crash the session.</p>
     </div>
 
@@ -152,7 +152,7 @@ is explicitly future work.</p>
     <h2 id="error-feedback">Error feedback<a class="anchor" aria-label="anchor" href="#error-feedback"></a></h2>
 
 
-<p>Any failure while handling a tool call — schema validation, a
+<p>Any failure while handling a tool call — argument validation, a
 component's <code>check()</code> hook, or a rendering error — is signaled as a
 regular R condition. ellmer catches it and returns
 <code><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage()</a></code> to the model as the tool error, so the model can

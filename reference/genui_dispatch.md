@@ -42,7 +42,9 @@ A `genui_plan` object, a list with at least `action` (one of `"create"`,
 `"update"`, `"remove"`, `"clear"`) plus the fields the executor needs:
 `id`, `component`, `args` (full args to render), `delta` (validated
 partial args, updates only), `parent_id`, and `ids` (teardown order,
-removes and clears only).
+removes and clears only). Argument values in `args` and `delta` use the
+form described in the "Argument values" section of
+[`genui_component()`](https://nanx.me/shinygenui/reference/genui_component.md).
 
 ## Examples
 

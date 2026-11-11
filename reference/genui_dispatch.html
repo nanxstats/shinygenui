@@ -23,7 +23,7 @@ returned plan."><meta property="og:image" content="https://nanx.me/shinygenui/lo
 
     <a class="navbar-brand me-2" href="../index.html">shinygenui</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -92,7 +92,9 @@ instance id) and <code>next_id</code> (integer).</p></dd>
 <code>"create"</code>, <code>"update"</code>, <code>"remove"</code>, <code>"clear"</code>) plus the fields the
 executor needs: <code>id</code>, <code>component</code>, <code>args</code> (full args to render),
 <code>delta</code> (validated partial args, updates only), <code>parent_id</code>, and <code>ids</code>
-(teardown order, removes and clears only).</p>
+(teardown order, removes and clears only). Argument values in <code>args</code>
+and <code>delta</code> use the form described in the "Argument values" section of
+<code><a href="genui_component.html">genui_component()</a></code>.</p>
     </div>
 
     <div class="section level2">

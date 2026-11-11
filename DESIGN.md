@@ -42,7 +42,7 @@ follows the same broad division of responsibilities used in querychat.
 
     user message → chat_server() → chat$stream_async(stream = "content") [ExtendedTask]
       → narrative text from model → chat_append() displays it
-      → tool call from model (arguments already checked against the tool schema)
+      → tool call from model (JSON arguments, parsed by ellmer but not converted)
           → compiled tool function turns the arguments into a genui_call
               → genui_dispatch(catalog, call, state)
                   checks the component, ids, argument types, and check() result
@@ -83,14 +83,15 @@ Shiny without another request to the model.
 - **Create**: dispatch assigns the next id. The executor inserts the
   shell in the canvas, or in a container when `parent_id` is supplied,
   and then runs `server(id, args, data)` in the module session.
-- **Update**: `update_component(id, args)` uses
-  [`modifyList()`](https://rdrr.io/r/utils/modifyList.html) to combine
-  the supplied arguments with the current arguments, then validates the
-  result. The executor destroys the instance’s observers, removes the
-  contents of the shell, and creates its UI and server again. The shell
-  and its position do not change. In version 0.1, Shiny inputs return to
-  their defaults after an update because the module starts again.
-  Preserving those values is future work.
+- **Update**: `update_component(id, args)` replaces each supplied
+  argument in the current arguments, then validates the result. A
+  supplied value replaces the stored value as a whole, including arrays
+  and objects, and `null` removes the argument. The executor destroys
+  the instance’s observers, removes the contents of the shell, and
+  creates its UI and server again. The shell and its position do not
+  change. In version 0.1, Shiny inputs return to their defaults after an
+  update because the module starts again. Preserving those values is
+  future work.
 - **Remove and clear**: the executor destroys observers and then removes
   the relevant shells. For a container, it removes children before their
   parent.
@@ -124,7 +125,7 @@ match exactly.
 An app can build its catalog inside the server function. Argument types
 can therefore use values that are known in the current session. For
 example, a `type_enum` can contain the column names of the current
-dataset. If the model invents a column, the tool schema rejects it.
+dataset. If the model invents a column, dispatch rejects it.
 
 shinygenui also supplies `update_component`, `remove_component`,
 `clear_canvas`, and `get_canvas_state`. ellmer cannot express an update
@@ -134,17 +135,56 @@ that string as data.
 [`genui_dispatch()`](https://nanx.me/shinygenui/reference/genui_dispatch.md)
 then validates the result against the types declared by the component,
 including scalar types, array types, and enum values. These are the same
-checks used for creation, but they happen in dispatch rather than at the
-provider.
+checks used for creation.
 
 The argument name `id` is reserved. `parent_id` is also reserved and is
 added automatically when a catalog contains a container.
+
+### Argument validation
+
+The schema sent to the provider guides the model but does not guarantee
+what comes back. Some providers, such as `chat_openai()`, use OpenAI’s
+strict mode, which constrains the model’s output to the schema. The
+others send standard JSON Schema, which a model may not follow. Since
+ellmer 0.5.1 that group includes `chat_openai_compatible()` and most
+providers built on it. A model can then omit a required argument, invent
+an enum value, or send the wrong type.
+[`genui_dispatch()`](https://nanx.me/shinygenui/reference/genui_dispatch.md)
+is therefore the only validation shinygenui relies on, and it checks
+every call from every provider.
+
+Every tool is registered with `convert = FALSE`. ellmer then calls the
+tool function with the arguments as parsed from JSON: arrays are unnamed
+lists, objects are named lists, and `null` is `NULL`. With ellmer’s
+default `convert = TRUE`, the arguments would be reshaped for ordinary R
+functions before dispatch could see them. An array of enums would become
+a factor, an array of objects a data frame, and a missing required
+argument `NA`. Dispatch would reject those forms or report the wrong
+problem.
+
+Dispatch validates each value and returns it in one canonical form,
+which is what components, the registry, and the trace hold:
+
+- A string, enum, boolean, integer, or number is a length-one vector.
+- An array of those is an atomic vector, which may be empty.
+- Any other array is an unnamed list of canonical items.
+- An object is a named list of canonical fields. Fields that are `null`
+  are dropped, as `null` arguments are.
+
+Dispatch accepts the canonical form as well as the parsed JSON form, so
+validating a canonical value returns it unchanged. Creation, update,
+replay, and calls written by hand in R all pass through this one step.
+As ellmer’s conversion does, dispatch unwraps a scalar that a model
+wrapped in an array with one element.
 
 ## Trace and replay
 
 Every successful call adds `list(op, id, component, args)` to an ordered
 trace. Trace entries contain only values that can be encoded as JSON.
 They do not contain environments or values from embedded Shiny inputs.
+Arguments are recorded in canonical form. A trace that was written to
+JSON and read back holds arrays as lists, and it replays to the same
+canvas because dispatch normalizes them again.
 
 Replay starts with a fresh registry, then passes each trace entry
 through the same dispatch and execution code used for model calls.
@@ -239,9 +279,9 @@ conversation changes with canvas trace replay.
   update schema but would add one tool for every component. Version 0.1
   uses one `update_component` tool and validates its arguments in
   dispatch.
-- [`modifyList()`](https://rdrr.io/r/utils/modifyList.html) drops a key
-  when its JSON value is `null`. This currently resets that argument to
-  its default. Is that the behavior we want to promise?
+- An update drops an argument when its JSON value is `null`. This
+  currently resets that argument to its default. Is that the behavior we
+  want to promise?
 - Version 0.1 uses a responsive CSS grid and allows each component to
   suggest a `width`. A later version might let the model choose column
   spans or use a more capable layout system.

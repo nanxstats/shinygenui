@@ -19,7 +19,7 @@ tools; in tests and replays you can hand-build them."><meta property="og:image" 
 
     <a class="navbar-brand me-2" href="../index.html">shinygenui</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,9 +67,11 @@ built-ins <code>"update_component"</code>, <code>"remove_component"</code>, <cod
 
 
 <dt id="arg-args">args<a class="anchor" aria-label="anchor" href="#arg-args"></a></dt>
-<dd><p>Named list of arguments as supplied by the model. For
-<code>update_component</code>, <code>args</code> must contain <code>id</code> and <code>args</code> (the partial
-arguments to merge, as a named list or a JSON object string).</p></dd>
+<dd><p>Named list of arguments as plain data, such as the model's
+JSON arguments after parsing. An array may be an atomic vector or an
+unnamed list. For <code>update_component</code>, <code>args</code> must contain <code>id</code> and
+<code>args</code> (the arguments to replace, as a named list or a JSON object
+string).</p></dd>
 
 </dl></div>
     <div class="section level2">

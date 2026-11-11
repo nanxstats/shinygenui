@@ -131,7 +131,10 @@ histogram <- genui_component(
   Validation rejects any other name before your code runs.
 - `ui(id, args)` returns htmltools tags. `id` is the module id for this
   instance. Use `shiny::NS(id)` for inputs and outputs inside the
-  component.
+  component. `args` holds the validated arguments. A string, number, or
+  other single value is a vector of length one, and an array of them is
+  an ordinary vector. An optional argument that the model left out is
+  absent, which is why the example falls back to `args$bins %||% 30`.
 - `server(id, args, data)` is optional. It usually calls
   [`shiny::moduleServer()`](https://rdrr.io/pkg/shiny/man/moduleServer.html),
   as in the example. `data` is the reactive passed to

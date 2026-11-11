@@ -2,10 +2,10 @@
 
 Wires a
 [`genui_catalog()`](https://nanx.me/shinygenui/reference/genui_catalog.md)
-to an ellmer `Chat`: compiles every component into a schema-validated
-tool, registers the built-in lifecycle tools (`update_component`,
-`remove_component`, `clear_canvas`), installs the assembled system
-prompt, and executes validated tool calls against the
+to an ellmer `Chat`: compiles every component into a tool with a typed
+argument schema, registers the built-in lifecycle tools
+(`update_component`, `remove_component`, `clear_canvas`), installs the
+assembled system prompt, and executes validated tool calls against the
 [`genui_canvas()`](https://nanx.me/shinygenui/reference/genui_canvas.md)
 with the matching `id`. Components stream onto the canvas progressively
 as the model emits tool calls; validation and rendering failures are
@@ -106,7 +106,7 @@ across updates is explicitly future work.
 
 ## Error feedback
 
-Any failure while handling a tool call — schema validation, a
+Any failure while handling a tool call — argument validation, a
 component's `check()` hook, or a rendering error — is signaled as a
 regular R condition. ellmer catches it and returns
 [`conditionMessage()`](https://rdrr.io/r/base/conditions.html) to the

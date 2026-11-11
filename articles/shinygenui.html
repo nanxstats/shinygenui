@@ -30,7 +30,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">shinygenui</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -198,7 +198,11 @@ runs.</li>
 <li>
 <code>ui(id, args)</code> returns htmltools tags. <code>id</code> is
 the module id for this instance. Use <code>shiny::NS(id)</code> for
-inputs and outputs inside the component.</li>
+inputs and outputs inside the component. <code>args</code> holds the
+validated arguments. A string, number, or other single value is a vector
+of length one, and an array of them is an ordinary vector. An optional
+argument that the model left out is absent, which is why the example
+falls back to <code>args$bins %||% 30</code>.</li>
 <li>
 <code>server(id, args, data)</code> is optional. It usually calls
 <code><a href="https://rdrr.io/pkg/shiny/man/moduleServer.html" class="external-link">shiny::moduleServer()</a></code>, as in the example. <code>data</code>

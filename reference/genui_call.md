@@ -21,9 +21,11 @@ genui_call(tool, args = list())
 
 - args:
 
-  Named list of arguments as supplied by the model. For
-  `update_component`, `args` must contain `id` and `args` (the partial
-  arguments to merge, as a named list or a JSON object string).
+  Named list of arguments as plain data, such as the model's JSON
+  arguments after parsing. An array may be an atomic vector or an
+  unnamed list. For `update_component`, `args` must contain `id` and
+  `args` (the arguments to replace, as a named list or a JSON object
+  string).
 
 ## Value
 

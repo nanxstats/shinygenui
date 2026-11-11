@@ -55,7 +55,8 @@ genui_component(
   [`htmltools::tag()`](https://rstudio.github.io/htmltools/reference/builder.html)
   (or tag list). `id` is the fully namespaced module id for this
   instance; use `shiny::NS(id)` to namespace any embedded inputs and
-  outputs. `args` is the validated argument list.
+  outputs. `args` is the validated argument list; see the "Argument
+  values" section.
 
 - server:
 
@@ -73,7 +74,7 @@ genui_component(
 - check:
 
   Optional `function(args, data)` for semantic validation beyond the
-  JSON schema. Return `NULL` when `args` are acceptable, or a string
+  declared types. Return `NULL` when `args` are acceptable, or a string
   describing the problem; the string is returned to the model as a tool
   error so it can self-correct.
 
@@ -91,6 +92,24 @@ genui_component(
 ## Value
 
 A `genui_component` object.
+
+## Argument values
+
+`ui`, `server`, and `check` receive `args` in the same form whether the
+call came from the model, from `update_component`, or from
+[`genui_replay()`](https://nanx.me/shinygenui/reference/genui_replay.md):
+
+- A string, enum, boolean, integer, or number is a length-one vector.
+
+- An array of those is an atomic vector, which may be empty.
+
+- An array of objects or of arrays is an unnamed list.
+
+- An object is a named list that holds only the fields supplied.
+
+An optional argument that the model omitted or set to null is absent
+from `args`, so test for it with
+[`is.null()`](https://rdrr.io/r/base/NULL.html).
 
 ## Examples
 
