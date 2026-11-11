@@ -230,7 +230,7 @@ component_data_table <- function(data) {
         output$table <- DT::renderDT({
           df <- data()
           shiny::req(is.data.frame(df))
-          columns <- unlist(args$columns) %||% names(df)
+          columns <- args$columns %||% names(df)
           DT::datatable(
             df[, columns, drop = FALSE],
             options = list(pageLength = args$page_size %||% 10L),
@@ -241,7 +241,7 @@ component_data_table <- function(data) {
       })
     },
     check = function(args, data) {
-      for (column in unlist(args$columns)) {
+      for (column in args$columns) {
         problem <- check_column(data, column)
         if (!is.null(problem)) {
           return(problem)

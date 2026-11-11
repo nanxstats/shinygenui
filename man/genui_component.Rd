@@ -36,7 +36,7 @@ column names of the active dataset.}
 \item{ui}{\verb{function(id, args)} returning an \code{\link[htmltools:tag]{htmltools::tag()}} (or tag
 list). \code{id} is the fully namespaced module id for this instance; use
 \code{shiny::NS(id)} to namespace any embedded inputs and outputs. \code{args} is
-the validated argument list.}
+the validated argument list; see the "Argument values" section.}
 
 \item{server}{Optional \verb{function(id, args, data)} that calls
 \code{\link[shiny:moduleServer]{shiny::moduleServer()}} to wire outputs and embedded inputs. \code{data} is
@@ -48,7 +48,7 @@ instance registry keyed by instance id; nothing reads it in v0.1, it is
 the hook for cross-component reactivity in a later release.}
 
 \item{check}{Optional \verb{function(args, data)} for semantic validation
-beyond the JSON schema. Return \code{NULL} when \code{args} are acceptable, or a
+beyond the declared types. Return \code{NULL} when \code{args} are acceptable, or a
 string describing the problem; the string is returned to the model as a
 tool error so it can self-correct.}
 
@@ -71,6 +71,22 @@ as a dynamic Shiny module every time the model creates or updates an
 instance. The model only ever supplies data arguments validated against
 the declared types; it never emits code.
 }
+\section{Argument values}{
+
+\code{ui}, \code{server}, and \code{check} receive \code{args} in the same form whether the
+call came from the model, from \code{update_component}, or from
+\code{\link[=genui_replay]{genui_replay()}}:
+\itemize{
+\item A string, enum, boolean, integer, or number is a length-one vector.
+\item An array of those is an atomic vector, which may be empty.
+\item An array of objects or of arrays is an unnamed list.
+\item An object is a named list that holds only the fields supplied.
+}
+
+An optional argument that the model omitted or set to null is absent from
+\code{args}, so test for it with \code{\link[=is.null]{is.null()}}.
+}
+
 \examples{
 genui_component(
   name = "note_card",

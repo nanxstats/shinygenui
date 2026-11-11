@@ -1,3 +1,33 @@
+# shinygenui (development version)
+
+## Tool arguments
+
+- Tools now set `convert = FALSE`, so ellmer passes the model's JSON arguments
+  to `genui_dispatch()` unchanged. ellmer used to convert them first, and
+  dispatch then rejected valid calls: an array of enums arrived as a factor
+  and an array of objects as a data frame. In particular, a `data_table` call
+  that named its columns always failed (#29).
+- Components now receive arguments in one documented form however the call
+  was made: an array of strings, numbers, or other single values is an atomic
+  vector, any other array is an unnamed list, and an object is a named list
+  without `NULL` fields. See the "Argument values" section of
+  `?genui_component` (#29).
+- `update_component` now replaces each supplied argument as a whole. An array
+  of objects can be updated, where before the update was rejected or, in a
+  replay, ignored. A supplied object replaces the previous one instead of
+  being merged with it field by field (#29).
+- A required argument that the model omits is now reported as missing instead
+  of as an invalid `NA`. Errors quote a rejected value as JSON, so arrays,
+  objects, and nulls remain recognizable to the model (#29).
+
+## Dependencies
+
+- Tested with ellmer 0.5.2. The ellmer requirement remains >= 0.4.1.
+  Since ellmer 0.5.1, `chat_openai_compatible()` and most providers built on
+  it no longer use strict tool schemas, so the model can omit required
+  arguments or send values outside an enum. shinygenui validates every call
+  itself and returns such mistakes to the model as tool errors (#29).
+
 # shinygenui 0.2.0
 
 ## Chat integration

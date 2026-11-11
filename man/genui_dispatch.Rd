@@ -23,7 +23,9 @@ A \code{genui_plan} object, a list with at least \code{action} (one of
 \code{"create"}, \code{"update"}, \code{"remove"}, \code{"clear"}) plus the fields the
 executor needs: \code{id}, \code{component}, \code{args} (full args to render),
 \code{delta} (validated partial args, updates only), \code{parent_id}, and \code{ids}
-(teardown order, removes and clears only).
+(teardown order, removes and clears only). Argument values in \code{args}
+and \code{delta} use the form described in the "Argument values" section of
+\code{\link[=genui_component]{genui_component()}}.
 }
 \description{
 The pure core of shinygenui: given the catalog, one normalized call, and

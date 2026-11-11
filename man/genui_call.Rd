@@ -10,9 +10,11 @@ genui_call(tool, args = list())
 \item{tool}{Tool name: a component name from the catalog, or one of the
 built-ins \code{"update_component"}, \code{"remove_component"}, \code{"clear_canvas"}.}
 
-\item{args}{Named list of arguments as supplied by the model. For
-\code{update_component}, \code{args} must contain \code{id} and \code{args} (the partial
-arguments to merge, as a named list or a JSON object string).}
+\item{args}{Named list of arguments as plain data, such as the model's
+JSON arguments after parsing. An array may be an atomic vector or an
+unnamed list. For \code{update_component}, \code{args} must contain \code{id} and
+\code{args} (the arguments to replace, as a named list or a JSON object
+string).}
 }
 \value{
 A \code{genui_call} object.

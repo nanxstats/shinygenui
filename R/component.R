@@ -8,6 +8,19 @@
 #' instance. The model only ever supplies data arguments validated against
 #' the declared types; it never emits code.
 #'
+#' @section Argument values:
+#' `ui`, `server`, and `check` receive `args` in the same form whether the
+#' call came from the model, from `update_component`, or from
+#' [genui_replay()]:
+#'
+#' - A string, enum, boolean, integer, or number is a length-one vector.
+#' - An array of those is an atomic vector, which may be empty.
+#' - An array of objects or of arrays is an unnamed list.
+#' - An object is a named list that holds only the fields supplied.
+#'
+#' An optional argument that the model omitted or set to null is absent from
+#' `args`, so test for it with [is.null()].
+#'
 #' @param name Tool name the model sees. A snake_case string: lowercase
 #'   letters, digits, and underscores, starting with a letter. Must be unique
 #'   within a catalog and must not collide with the built-in lifecycle tools
@@ -25,7 +38,7 @@
 #' @param ui `function(id, args)` returning an [htmltools::tag()] (or tag
 #'   list). `id` is the fully namespaced module id for this instance; use
 #'   `shiny::NS(id)` to namespace any embedded inputs and outputs. `args` is
-#'   the validated argument list.
+#'   the validated argument list; see the "Argument values" section.
 #' @param server Optional `function(id, args, data)` that calls
 #'   [shiny::moduleServer()] to wire outputs and embedded inputs. `data` is
 #'   the reactive passed to [genui_server()]. If the module creates
@@ -35,7 +48,7 @@
 #'   instance registry keyed by instance id; nothing reads it in v0.1, it is
 #'   the hook for cross-component reactivity in a later release.
 #' @param check Optional `function(args, data)` for semantic validation
-#'   beyond the JSON schema. Return `NULL` when `args` are acceptable, or a
+#'   beyond the declared types. Return `NULL` when `args` are acceptable, or a
 #'   string describing the problem; the string is returned to the model as a
 #'   tool error so it can self-correct.
 #' @param container If `TRUE`, this component can host child instances: its

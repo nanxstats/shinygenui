@@ -64,3 +64,7 @@ reserved_arg_names <- function() {
 drop_nulls <- function(x) {
   x[!vapply(x, is.null, logical(1))]
 }
+
+to_json_compact <- function(x) {
+  as.character(jsonlite::toJSON(x, auto_unbox = TRUE, null = "null"))
+}

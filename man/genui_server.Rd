@@ -44,12 +44,12 @@ reactives \code{trace} (the ordered call trace, see \code{\link[=genui_trace]{ge
 }
 \description{
 Wires a \code{\link[=genui_catalog]{genui_catalog()}} to an ellmer \code{Chat}: compiles every component
-into a schema-validated tool, registers the built-in lifecycle tools
-(\code{update_component}, \code{remove_component}, \code{clear_canvas}), installs the
-assembled system prompt, and executes validated tool calls against the
-\code{\link[=genui_canvas]{genui_canvas()}} with the matching \code{id}. Components stream onto the
-canvas progressively as the model emits tool calls; validation and
-rendering failures are returned to the model as tool errors and never
+into a tool with a typed argument schema, registers the built-in
+lifecycle tools (\code{update_component}, \code{remove_component}, \code{clear_canvas}),
+installs the assembled system prompt, and executes validated tool calls
+against the \code{\link[=genui_canvas]{genui_canvas()}} with the matching \code{id}. Components stream
+onto the canvas progressively as the model emits tool calls; validation
+and rendering failures are returned to the model as tool errors and never
 crash the session.
 }
 \details{
@@ -78,7 +78,7 @@ is explicitly future work.
 
 \section{Error feedback}{
 
-Any failure while handling a tool call --- schema validation, a
+Any failure while handling a tool call --- argument validation, a
 component's \code{check()} hook, or a rendering error --- is signaled as a
 regular R condition. ellmer catches it and returns
 \code{conditionMessage()} to the model as the tool error, so the model can

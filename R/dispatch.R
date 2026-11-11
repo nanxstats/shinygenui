@@ -7,9 +7,11 @@
 #'
 #' @param tool Tool name: a component name from the catalog, or one of the
 #'   built-ins `"update_component"`, `"remove_component"`, `"clear_canvas"`.
-#' @param args Named list of arguments as supplied by the model. For
-#'   `update_component`, `args` must contain `id` and `args` (the partial
-#'   arguments to merge, as a named list or a JSON object string).
+#' @param args Named list of arguments as plain data, such as the model's
+#'   JSON arguments after parsing. An array may be an atomic vector or an
+#'   unnamed list. For `update_component`, `args` must contain `id` and
+#'   `args` (the arguments to replace, as a named list or a JSON object
+#'   string).
 #'
 #' @return A `genui_call` object.
 #' @export
@@ -81,7 +83,9 @@ instance_id_numbers <- function(ids) {
 #'   `"create"`, `"update"`, `"remove"`, `"clear"`) plus the fields the
 #'   executor needs: `id`, `component`, `args` (full args to render),
 #'   `delta` (validated partial args, updates only), `parent_id`, and `ids`
-#'   (teardown order, removes and clears only).
+#'   (teardown order, removes and clears only). Argument values in `args`
+#'   and `delta` use the form described in the "Argument values" section of
+#'   [genui_component()].
 #' @export
 #' @examples
 #' catalog <- genui_catalog(
@@ -141,6 +145,7 @@ dispatch_create <- function(catalog, name, args, state, data) {
 }
 
 check_parent <- function(catalog, parent_id, state) {
+  parent_id <- unwrap_scalar(parent_id)
   if (!is_string(parent_id)) {
     dispatch_abort("{.arg parent_id} must be a single instance id string, like {.val c1}.")
   }
@@ -182,8 +187,16 @@ dispatch_update <- function(catalog, cargs, state, data) {
 
   # Validate the provided (non-null) part of the delta; a JSON null value
   # means "reset this argument to its default" and is applied by the merge.
-  validate_component_args(component, drop_nulls(delta), complete = FALSE)
-  merged <- utils::modifyList(instance$args, delta)
+  provided <- validate_component_args(
+    component,
+    drop_nulls(delta),
+    complete = FALSE
+  )
+  delta[names(provided)] <- provided
+  # Each supplied argument replaces the stored value as a whole. Arrays and
+  # objects are never merged element by element.
+  merged <- instance$args
+  merged[names(delta)] <- delta
   merged <- validate_component_args(component, merged, complete = TRUE)
   run_check_hook(component, merged, data)
 
@@ -201,9 +214,12 @@ parse_update_args <- function(args) {
   if (is.null(args)) {
     return(list())
   }
+  args <- unwrap_scalar(args)
   if (is_string(args)) {
+    # No simplification: arrays stay lists, as in the arguments ellmer passes
+    # to the component tools, so both paths share one normalization.
     parsed <- tryCatch(
-      jsonlite::fromJSON(args, simplifyVector = TRUE),
+      jsonlite::fromJSON(args, simplifyVector = FALSE),
       error = function(e) {
         dispatch_abort(c(
           "{.arg args} is not valid JSON.",
@@ -240,6 +256,7 @@ dispatch_clear <- function(state) {
 }
 
 check_instance_id <- function(id, state, verb, call = rlang::caller_env()) {
+  id <- unwrap_scalar(id)
   if (!is_string(id)) {
     dispatch_abort(
       "{.arg id} must be a single instance id string, like {.val c1}.",
@@ -285,7 +302,8 @@ instance_descendants <- function(instances, id) {
 # Argument validation ----------------------------------------------------
 
 # Validates `args` against a component's declared ellmer types and returns
-# the cleaned list (NULL values dropped). With `complete = TRUE`, required
+# the cleaned list: NULL values dropped and every value in the canonical form
+# described at validate_arg_value(). With `complete = TRUE`, required
 # arguments must all be present.
 validate_component_args <- function(component, args, complete = TRUE) {
   if (length(args) > 0 && !is_named_list(args)) {
@@ -323,21 +341,36 @@ validate_component_args <- function(component, args, complete = TRUE) {
   }
 
   for (nm in names(args)) {
-    validate_arg_value(declared[[nm]], args[[nm]], nm, component$name)
+    args[nm] <- list(
+      validate_arg_value(declared[[nm]], args[[nm]], nm, component$name)
+    )
   }
   args
 }
 
+# Validates one value against its declared type and returns it in canonical
+# form. Values arrive as plain data in either spelling: parsed from JSON
+# (every array is an unnamed list) or written in R (arrays of scalars are
+# atomic vectors). Components, the registry, and the trace only ever see the
+# canonical form:
+#
+# - string, enum, boolean, integer, number: a length-one vector
+# - array of those: an atomic vector, possibly empty
+# - any other array: an unnamed list of canonical items
+# - object: a named list of canonical fields, without NULL fields
 validate_arg_value <- function(type, value, arg, component) {
   if (inherits(type, "ellmer::TypeEnum")) {
+    value <- unwrap_scalar(value)
     values <- attr(type, "values", exact = TRUE)
     if (!is_string(value) || !value %in% values) {
+      shown <- describe_value(value)
       dispatch_abort(c(
-        "Invalid value {.val {value}} for argument {.val {arg}} of {.val {component}}.",
+        "Invalid value {shown} for argument {.val {arg}} of {.val {component}}.",
         i = "Must be one of {.val {values}}."
       ))
     }
   } else if (inherits(type, "ellmer::TypeBasic")) {
+    value <- unwrap_scalar(value)
     kind <- attr(type, "type", exact = TRUE)
     ok <- switch(kind,
       string = is_string(value),
@@ -350,21 +383,27 @@ validate_arg_value <- function(type, value, arg, component) {
       TRUE
     )
     if (!ok) {
+      shown <- describe_value(value)
       dispatch_abort(
-        "Argument {.val {arg}} of {.val {component}} must be a single {kind} value, not {.val {value}}."
+        "Argument {.val {arg}} of {.val {component}} must be a single {kind} value, not {shown}."
       )
     }
   } else if (inherits(type, "ellmer::TypeArray")) {
     items <- attr(type, "items", exact = TRUE)
-    bad_shape <- !(is.atomic(value) || is.list(value)) ||
+    bad_shape <- is.null(value) ||
+      !(is.atomic(value) || is.list(value)) ||
       (is.list(value) && !is.null(names(value)))
     if (bad_shape) {
       dispatch_abort(
         "Argument {.val {arg}} of {.val {component}} must be an array of values."
       )
     }
-    for (item in as.list(value)) {
+    value <- lapply(unname(as.list(value)), function(item) {
       validate_arg_value(items, item, arg, component)
+    })
+    empty <- scalar_prototype(items)
+    if (!is.null(empty)) {
+      value <- unlist(value, use.names = FALSE) %||% empty
     }
   } else if (inherits(type, "ellmer::TypeObject")) {
     properties <- attr(type, "properties", exact = TRUE)
@@ -373,6 +412,8 @@ validate_arg_value <- function(type, value, arg, component) {
         "Argument {.val {arg}} of {.val {component}} must be an object with named fields."
       )
     }
+    # As at the top level, a null field is an absent field.
+    value <- drop_nulls(value)
     unknown <- setdiff(names(value), names(properties))
     if (length(unknown) > 0) {
       dispatch_abort(c(
@@ -392,12 +433,52 @@ validate_arg_value <- function(type, value, arg, component) {
       )
     }
     for (nm in names(value)) {
-      validate_arg_value(properties[[nm]], value[[nm]], arg, component)
+      value[nm] <- list(
+        validate_arg_value(properties[[nm]], value[[nm]], arg, component)
+      )
     }
   }
-  # Other type kinds (for example, raw JSON schemas) are passed through untouched;
-  # the provider already validated them against the declared schema.
-  invisible(value)
+  # Other type kinds (for example, raw JSON schemas) pass through untouched.
+  # Nothing here can validate them, and not every provider enforces the
+  # declared schema, so such a component should verify the value in check().
+  value
+}
+
+# Some models wrap a scalar in a one-element JSON array. ellmer's argument
+# conversion unwraps it. The tools opt out of that conversion, so the same
+# tolerance lives here, for component arguments and for the ids and `args`
+# string of the built-in tools.
+unwrap_scalar <- function(value) {
+  if (is.list(value) && length(value) == 1 && is.null(names(value))) {
+    value[[1]]
+  } else {
+    value
+  }
+}
+
+# The empty atomic vector that an array of `type` simplifies to, or NULL
+# when values of `type` are not scalars and an array of them stays a list.
+scalar_prototype <- function(type) {
+  if (inherits(type, "ellmer::TypeEnum")) {
+    character()
+  } else if (inherits(type, "ellmer::TypeBasic")) {
+    switch(attr(type, "type", exact = TRUE),
+      string = character(),
+      boolean = logical(),
+      integer = integer(),
+      number = numeric()
+    )
+  }
+}
+
+# A rejected value as the model wrote it: compact JSON, so that nulls,
+# arrays, and objects keep their shape. The text is model-supplied; only
+# ever interpolate it into a message as a single value.
+describe_value <- function(value) {
+  tryCatch(
+    to_json_compact(value),
+    error = function(e) "a value that is not plain data"
+  )
 }
 
 run_check_hook <- function(component, args, data) {
