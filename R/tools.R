@@ -6,6 +6,13 @@
 # arguments simply drop out before dispatch. The tool implementations only
 # ever forward plain data into engine$handle(); nothing the model sends is
 # ever evaluated as code.
+#
+# Every tool sets `convert = FALSE`, so ellmer calls the function with the
+# model's arguments exactly as parsed from JSON. ellmer's default conversion
+# targets ordinary R functions: it turns enum arrays into factors and arrays
+# of objects into data frames, and fills in `NA` for a required argument the
+# model left out. genui_dispatch() needs the plain data instead, because it
+# is the one place that validates arguments and decides their R form.
 compile_tools <- function(catalog, engine) {
   with_parent <- catalog_has_containers(catalog)
   tools <- lapply(names(catalog), function(name) {
@@ -32,6 +39,7 @@ compile_component_tool <- function(component, engine, with_parent = FALSE) {
     name = component$name,
     description = component$description,
     arguments = arguments,
+    convert = FALSE,
     annotations = ellmer::tool_annotations(
       title = paste("Rendering", component$name)
     )
@@ -80,6 +88,7 @@ builtin_tools <- function(engine) {
           )
         )
       ),
+      convert = FALSE,
       annotations = ellmer::tool_annotations(title = "Updating component")
     ),
     ellmer::tool(
@@ -99,6 +108,7 @@ builtin_tools <- function(engine) {
           "The instance id to remove, as returned when it was created (for example \"c1\")."
         )
       ),
+      convert = FALSE,
       annotations = ellmer::tool_annotations(title = "Removing component")
     ),
     ellmer::tool(
@@ -111,6 +121,7 @@ builtin_tools <- function(engine) {
         "Use only when the user asks to start over or the whole view is being replaced."
       ),
       arguments = list(),
+      convert = FALSE,
       annotations = ellmer::tool_annotations(title = "Clearing canvas")
     ),
     ellmer::tool(
@@ -126,6 +137,7 @@ builtin_tools <- function(engine) {
         "adjusted. It changes nothing."
       ),
       arguments = list(),
+      convert = FALSE,
       annotations = ellmer::tool_annotations(
         title = "Reading canvas state",
         read_only_hint = TRUE

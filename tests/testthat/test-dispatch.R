@@ -155,6 +155,137 @@ test_that("array arguments validate each element", {
   )
 })
 
+test_that("arguments parsed from JSON come back in canonical form", {
+  catalog <- test_catalog()
+  plan <- genui_dispatch(
+    catalog,
+    genui_call(
+      "data_table",
+      json_args('{"columns": ["mpg", "hp"], "page_size": 5}')
+    ),
+    empty_state()
+  )
+  # an array of scalars is an atomic vector, however it was spelled
+  expect_identical(plan$args$columns, c("mpg", "hp"))
+  expect_identical(plan$args$page_size, 5L)
+
+  # an empty array stays an array instead of becoming absent
+  plan <- genui_dispatch(
+    catalog,
+    genui_call("data_table", json_args('{"columns": []}')),
+    empty_state()
+  )
+  expect_identical(plan$args$columns, character())
+
+  # a scalar wrapped in a one-element array is unwrapped
+  plan <- genui_dispatch(
+    catalog,
+    genui_call("value_box", json_args('{"title": ["A"], "column": ["mpg"]}')),
+    empty_state()
+  )
+  expect_identical(plan$args, list(title = "A", column = "mpg"))
+
+  # canonical arguments validate to themselves, so replay is stable
+  again <- genui_dispatch(
+    catalog,
+    genui_call("value_box", plan$args),
+    empty_state()
+  )
+  expect_identical(again$args, plan$args)
+})
+
+test_that("arrays of objects and objects keep their structure", {
+  catalog <- structured_catalog()
+  plan <- genui_dispatch(
+    catalog,
+    genui_call(
+      "checklist",
+      json_args(
+        '{
+          "items": [{"label": "a", "done": true}, {"label": "b", "done": null}],
+          "style": {"color": "red", "size": null},
+          "scores": [1, 2.5]
+        }'
+      )
+    ),
+    empty_state()
+  )
+  # null fields are absent fields, like null arguments
+  expect_identical(
+    plan$args,
+    list(
+      items = list(list(label = "a", done = TRUE), list(label = "b")),
+      style = list(color = "red"),
+      scores = c(1, 2.5)
+    )
+  )
+
+  again <- genui_dispatch(
+    catalog,
+    genui_call("checklist", plan$args),
+    empty_state()
+  )
+  expect_identical(again$args, plan$args)
+})
+
+test_that("structured arguments are validated field by field", {
+  catalog <- structured_catalog()
+  bad <- function(json) {
+    expect_error(
+      genui_dispatch(
+        catalog,
+        genui_call("checklist", json_args(json)),
+        empty_state()
+      ),
+      class = "genui_dispatch_error"
+    )
+  }
+
+  err <- bad('{"items": [{"done": true}]}')
+  expect_match(conditionMessage(err), "label")
+
+  err <- bad('{"items": [{"label": "a", "note": "x"}]}')
+  expect_match(conditionMessage(err), "note")
+
+  err <- bad('{"items": [{"label": "a"}], "style": {"color": "green"}}')
+  expect_match(conditionMessage(err), "green")
+  expect_match(conditionMessage(err), "blue")
+
+  # an object where an array is expected
+  bad('{"items": {"label": "a"}}')
+})
+
+test_that("rejected values are quoted back as the model wrote them", {
+  catalog <- structured_catalog()
+  message_for <- function(json) {
+    conditionMessage(expect_error(
+      genui_dispatch(
+        catalog,
+        genui_call("checklist", json_args(json)),
+        empty_state()
+      ),
+      class = "genui_dispatch_error"
+    ))
+  }
+
+  expect_match(
+    message_for('{"items": [{"label": ["a", "b"]}]}'),
+    'not ["a","b"]',
+    fixed = TRUE
+  )
+  expect_match(
+    message_for('{"items": [{"label": "a"}], "scores": [1, null]}'),
+    "not null",
+    fixed = TRUE
+  )
+  # braces in a model-supplied value are text, not cli markup
+  expect_match(
+    message_for('{"items": [{"label": "a"}], "style": {"color": "{.val x}"}}'),
+    'Invalid value "{.val x}"',
+    fixed = TRUE
+  )
+})
+
 test_that("NULL optional arguments are treated as absent", {
   plan <- genui_dispatch(
     test_catalog(),
@@ -286,6 +417,112 @@ test_that("update accepts args as a JSON object string", {
     ),
     class = "genui_dispatch_error"
   )
+})
+
+test_that("update returns the same canonical form as create", {
+  catalog <- test_catalog()
+  registry <- GenuiRegistry$new()
+  apply_call(registry, catalog, "data_table", json_args('{"columns": ["mpg"]}'))
+
+  plan <- genui_dispatch(
+    catalog,
+    genui_call(
+      "update_component",
+      list(id = "c1", args = '{"columns": ["hp", "wt"], "page_size": 20}')
+    ),
+    registry
+  )
+  expect_identical(plan$args, list(columns = c("hp", "wt"), page_size = 20L))
+  # the delta recorded in the trace is canonical too
+  expect_identical(plan$delta, list(columns = c("hp", "wt"), page_size = 20L))
+
+  err <- expect_error(
+    genui_dispatch(
+      catalog,
+      genui_call(
+        "update_component",
+        list(id = "c1", args = '{"columns": ["hp", "gears"]}')
+      ),
+      registry
+    ),
+    class = "genui_dispatch_error"
+  )
+  expect_match(conditionMessage(err), "gears")
+})
+
+test_that("update replaces arrays and objects as a whole", {
+  catalog <- structured_catalog()
+  registry <- GenuiRegistry$new()
+  apply_call(
+    registry,
+    catalog,
+    "checklist",
+    json_args(
+      '{
+        "items": [{"label": "a", "done": true}, {"label": "b"}],
+        "style": {"color": "red", "size": 12}
+      }'
+    )
+  )
+
+  plan <- genui_dispatch(
+    catalog,
+    genui_call(
+      "update_component",
+      list(
+        id = "c1",
+        args = '{"items": [{"label": "c"}], "style": {"color": "blue"}}'
+      )
+    ),
+    registry
+  )
+  expect_identical(plan$args$items, list(list(label = "c")))
+  # no leftover `size` from the previous object
+  expect_identical(plan$args$style, list(color = "blue"))
+
+  # a supplied object must be complete on its own
+  err <- expect_error(
+    genui_dispatch(
+      catalog,
+      genui_call(
+        "update_component",
+        list(id = "c1", args = '{"style": {"size": 14}}')
+      ),
+      registry
+    ),
+    class = "genui_dispatch_error"
+  )
+  expect_match(conditionMessage(err), "color")
+})
+
+test_that("built-in tools tolerate scalars wrapped in an array", {
+  catalog <- test_catalog()
+  registry <- GenuiRegistry$new()
+  apply_call(registry, catalog, "card_row", list())
+  apply_call(
+    registry,
+    catalog,
+    "value_box",
+    json_args('{"title": "A", "column": "mpg", "parent_id": ["c1"]}')
+  )
+  expect_identical(registry$get("c2")$parent_id, "c1")
+
+  plan <- genui_dispatch(
+    catalog,
+    genui_call(
+      "update_component",
+      json_args('{"id": ["c2"], "args": ["{\\"title\\": \\"B\\"}"]}')
+    ),
+    registry
+  )
+  expect_identical(plan$args$title, "B")
+
+  plan <- genui_dispatch(
+    catalog,
+    genui_call("remove_component", json_args('{"id": ["c2"]}')),
+    registry
+  )
+  expect_identical(plan$id, "c2")
 })
 
 test_that("JSON null resets an optional argument to its default", {

@@ -84,6 +84,53 @@ test_that("registered tools drive the canvas and the returned reactives", {
   )
 })
 
+test_that("array arguments survive the trip from tool call to replay", {
+  chat <- local_chat()
+  shiny::testServer(
+    genui_server,
+    args = list(
+      id = "genui",
+      catalog = test_catalog(),
+      chat = chat,
+      data = function() NULL
+    ),
+    {
+      tools <- chat$get_tools()
+      handles <- session$returned
+
+      # the call ellmer makes for a `convert = FALSE` tool
+      suppressWarnings(do.call(
+        tools$data_table,
+        json_args('{"columns": ["mpg", "hp"], "page_size": null}')
+      ))
+      expect_identical(handles$instances()$c1$args, list(columns = c("mpg", "hp")))
+
+      suppressWarnings(
+        tools$update_component(id = "c1", args = '{"columns": ["wt"]}')
+      )
+      expect_identical(handles$instances()$c1$args, list(columns = "wt"))
+
+      # a required argument the model left out is reported as missing
+      expect_error(
+        do.call(tools$value_box, json_args('{"title": "A"}')),
+        "Missing required argument",
+        class = "genui_dispatch_error"
+      )
+
+      # the trace round-trips through JSON and replays to the same canvas
+      trace <- handles$trace()
+      saved <- jsonlite::toJSON(trace, auto_unbox = TRUE, null = "null")
+      replayed <- suppressWarnings(genui_replay(
+        jsonlite::fromJSON(saved, simplifyVector = FALSE),
+        test_catalog(),
+        target = "replay"
+      ))
+      expect_identical(replayed$instances(), handles$instances())
+      expect_identical(replayed$trace(), trace)
+    }
+  )
+})
+
 test_that("genui_server validates its inputs", {
   expect_error(
     shiny::testServer(

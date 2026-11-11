@@ -28,6 +28,15 @@ test_that("compile_tools produces one tool per component plus built-ins", {
   }
 })
 
+test_that("every tool opts out of ellmer's argument conversion", {
+  # With `convert = TRUE` ellmer would hand over factors, data frames, and NA
+  # in place of the plain JSON data that genui_dispatch() validates.
+  tools <- shinygenui:::compile_tools(test_catalog(), fake_engine())
+  for (tool in tools) {
+    expect_false(attr(tool, "convert", exact = TRUE))
+  }
+})
+
 test_that("compiled tool formals match the declared arguments plus parent_id", {
   engine <- fake_engine()
   tools <- shinygenui:::compile_tools(test_catalog(), engine)
@@ -56,6 +65,26 @@ test_that("calling a compiled tool forwards a normalized genui_call", {
   # omitted optional arguments (digits, parent_id) are dropped, not NULL
   expect_identical(call$args, list(title = "A", column = "mpg"))
   expect_length(engine$calls, 1)
+})
+
+test_that("compiled tools forward JSON arguments untouched", {
+  engine <- fake_engine()
+  tools <- shinygenui:::compile_tools(test_catalog(), engine)
+  data_table <- tools[[3]]
+
+  # ellmer calls a `convert = FALSE` tool as do.call(tool, <parsed JSON>).
+  # Strict providers send null for optional arguments the model leaves out.
+  call <- do.call(
+    data_table,
+    json_args('{"columns": ["mpg", "hp"], "page_size": null, "parent_id": null}')
+  )
+  expect_identical(call$tool, "data_table")
+  expect_identical(call$args, list(columns = list("mpg", "hp")))
+
+  # Other providers omit them, and may omit required arguments as well;
+  # dispatch reports those, so nothing is filled in here.
+  call <- do.call(data_table, json_args("{}"))
+  expect_length(call$args, 0)
 })
 
 test_that("built-in tools forward id and args", {
