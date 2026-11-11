@@ -1,6 +1,6 @@
 [project]
-r-version = "4.6.1"
-snapshot = "2026-09-21"
+r-version = "4.6.2"
+snapshot = "2026-11-11"
 strict = false
 
 [vendor]
